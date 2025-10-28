@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Medicine Inventory Management</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="profile-info">
+          <img
+            src="https://randomuser.me/api/portraits/men/32.jpg"
+            alt="Profile"
+            class="profile-pic"
+          />
+          <div>
+            <div class="profile-name">John Smith</div>
+            <div class="profile-role">Admin</div>
+          </div>
+        </div>
+        <div class="menu-icon" id="closeSidebarBtn">☰</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="" class="nav-link active">Inventory Management</a>
+        <a href="#" class="nav-link">Transaction Summary</a>
+        <a href="#" class="nav-link">Supplier Management</a>
+        <a href="#" class="nav-link">User Management</a>
+        <a href="#" class="nav-link">Audit Log</a>
+      </nav>
+      <footer class="sidebar-footer">
+        <p>© 2025 Pharma Ease</p>
+        <p>v1.0.0</p>
+      </footer>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="container">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Inventory Management</h2>
+            <div class="header-controls">
+              <div class="input-wrapper">
+                <svg
+                  class="search-icon icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input
+                  type="search"
+                  class="input"
+                  id="searchInput"
+                  placeholder="Search medicines..."
+                />
+              </div>
+              <button class="btn btn-outline btn-icon">
+                <svg
+                  class="icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <polygon
+                    points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"
+                  ></polygon>
+                </svg>
+              </button>
+              <button class="btn btn-primary" id="addMedicineBtn">
+                <svg
+                  class="icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add New Medicine
+              </button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Code</th>
+                  <th>Category</th>
+                  <th>Stock Quantity</th>
+                  <th>Expiry Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="medicineTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" id="medicineModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modalTitle">Add New Medicine</h3>
+          <p class="modal-description" id="modalDescription">
+            Enter the medicine details to add to inventory.
+          </p>
+        </div>
+        <form id="medicineForm">
+          <div class="form-group">
+            <label class="form-label" for="medicineName">Medicine Name</label>
+            <input
+              type="text"
+              class="input"
+              id="medicineName"
+              placeholder="e.g., Paracetamol 500mg"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="medicineCode">Medicine Code</label>
+            <input
+              type="text"
+              class="input"
+              id="medicineCode"
+              placeholder="e.g., MED001"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="medicineCategory"
+              >Medicine Category</label
+            >
+            <select class="input" id="medicineCategory" required>
+              <option value="">Select category...</option>
+              <option value="Pain Relief">Pain Relief</option>
+              <option value="Antibiotic">Antibiotic</option>
+              <option value="Antacid">Antacid</option>
+              <option value="Diabetes">Diabetes</option>
+              <option value="Blood Thinner">Blood Thinner</option>
+              <option value="Antihistamine">Antihistamine</option>
+              <option value="Blood Pressure">Blood Pressure</option>
+              <option value="Cholesterol">Cholesterol</option>
+              <option value="Vitamin">Vitamin</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="medicineQuantity">Quantity</label>
+              <input
+                type="number"
+                class="input"
+                id="medicineQuantity"
+                placeholder="e.g., 100"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="medicineUnit">Unit</label>
+              <select class="input" id="medicineUnit" required>
+                <option value="Strip">Strip</option>
+                <option value="Bottle">Bottle</option>
+                <option value="Box">Box</option>
+                <option value="Tube">Tube</option>
+                <option value="Vial">Vial</option>
+                <option value="Sachet">Sachet</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="medicineExpiry">Expiry Date</label>
+            <input type="date" class="input" id="medicineExpiry" required />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              Add Medicine
+            </button>
+            <button type="button" class="btn btn-outline" id="cancelBtn">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

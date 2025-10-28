@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharma Ease | User Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+
+<body class="min-h-screen bg-muted flex">
+    <aside class="sidebar w-60 min-h-screen p-4 flex flex-col justify-between fixed left-0 top-0 hidden md:flex">
+        <div>
+            <div class="text-xl font-semibold mb-6">Pharma Ease</div>
+            <div class="text-sm font-light text-white/70 mb-8">Pharmacy Management</div>
+
+            <nav class="space-y-1">
+                <a href="#" class="flex items-center p-2 rounded-lg text-white/80 hover:bg-white/10 transition">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="#" class="flex items-center p-2 rounded-lg text-white/80 hover:bg-white/10 transition">
+                    <i data-lucide="package" class="w-5 h-5 mr-3"></i>
+                    Inventory
+                </a>
+                <a href="#" class="flex items-center p-2 rounded-lg text-white/80 hover:bg-white/10 transition">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 mr-3"></i>
+                    Cashier/POS
+                </a>
+                <a href="#" class="flex items-center p-2 rounded-lg bg-sidebar-accent font-medium text-sidebar-primary-foreground transition">
+                    <i data-lucide="users" class="w-5 h-5 mr-3"></i>
+                    User Management
+                </a>
+                <a href="#" class="flex items-center p-2 rounded-lg text-white/80 hover:bg-white/10 transition">
+                    <i data-lucide="truck" class="w-5 h-5 mr-3"></i>
+                    Suppliers
+                </a>
+                <a href="#" class="flex items-center p-2 rounded-lg text-white/80 hover:bg-white/10 transition">
+                    <i data-lucide="file-text" class="w-5 h-5 mr-3"></i>
+                    Purchase Orders
+                </a>
+                <a href="#" class="flex items-center p-2 rounded-lg text-white/80 hover:bg-white/10 transition">
+                    <i data-lucide="receipt" class="w-5 h-5 mr-3"></i>
+                    Transaction Summary
+                </a>
+                <a href="#" class="flex items-center p-2 rounded-lg text-white/80 hover:bg-white/10 transition">
+                    <i data-lucide="list-checks" class="w-5 h-5 mr-3"></i>
+                    Audit Log
+                </a>
+                <a href="#" class="flex items-center p-2 rounded-lg text-white/80 hover:bg-white/10 transition">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5 mr-3"></i>
+                    Reports
+                </a>
+            </nav>
+        </div>
+        <div class="text-xs text-white/50">
+            © 2025 Pharma Ease<br>v1.0.0
+        </div>
+    </aside>
+
+    <main class="flex-1 p-6 md:ml-60">
+        <header class="mb-6">
+            <h1 class="text-2xl font-semibold text-card-foreground">User Management</h1>
+            <p class="text-muted-foreground text-sm">Manage your pharmacy operations efficiently</p>
+        </header>
+
+        <div class="space-y-4">
+            <div class="bg-card text-card-foreground rounded-lg border border-border shadow-sm">
+                <div class="p-6 border-b border-border">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <h2 class="text-xl font-semibold">User & Employee Management</h2>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1 sm:flex-initial">
+                                <i data-lucide="search" class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"></i>
+                                <input type="search" id="search-term" placeholder="Search users..." class="input-style pl-8 w-full sm:w-[300px] text-sm" oninput="handleSearch(this.value)">
+                            </div>
+                            <button class="btn-base btn-accent" onclick="openFormModal(null)">
+                                <i data-lucide="plus" class="h-4 w-4 mr-2"></i>
+                                Add User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-0 overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="[&_tr]:border-b">
+                            <tr class="font-medium text-muted-foreground">
+                                <th class="h-12 px-6 align-middle">Name</th>
+                                <th class="h-12 px-6 align-middle">Email</th>
+                                <th class="h-12 px-6 align-middle">Role</th>
+                                <th class="h-12 px-6 align-middle">Status</th>
+                                <th class="h-12 px-6 align-middle">Last Login</th>
+                                <th class="h-12 px-6 align-middle">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body" class="[&_tr:last-child]:border-0 [&_tr]:border-b border-border">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="no-users-message" class="hidden text-center p-6 text-muted-foreground">
+                    No users found matching your search term.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="user-form-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4" onclick="closeFormModal(event)">
+        <div class="bg-card rounded-lg shadow-2xl w-full max-w-md p-6" onclick="event.stopPropagation()">
+            <h3 id="modal-title" class="text-xl font-semibold mb-4 border-b pb-2">Add New User</h3>
+            <form id="user-form" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="user-id">
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="user-name" class="block text-sm font-medium mb-1">Name</label>
+                        <input type="text" id="user-name" required class="input-style w-full" placeholder="e.g. Jane Doe">
+                    </div>
+                    <div>
+                        <label for="user-email" class="block text-sm font-medium mb-1">Email</label>
+                        <input type="email" id="user-email" required class="input-style w-full" placeholder="e.g. jane@pharmaease.com">
+                    </div>
+                    <div>
+                        <label for="user-role" class="block text-sm font-medium mb-1">Role</label>
+                        <select id="user-role" required class="input-style w-full">
+                            <option value="Admin">Admin</option>
+                            <option value="Pharmacist">Pharmacist</option>
+                            <option value="Cashier">Cashier</option>
+                        </select>
+                    </div>
+                    <div id="status-field" class="hidden">
+                        <label for="user-status" class="block text-sm font-medium mb-1">Status</label>
+                        <select id="user-status" class="input-style w-full">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 mt-6">
+                    <button type="button" class="btn-base btn-ghost" onclick="closeFormModal()">Cancel</button>
+                    <button type="submit" class="btn-base btn-primary" id="form-submit-button">Add User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

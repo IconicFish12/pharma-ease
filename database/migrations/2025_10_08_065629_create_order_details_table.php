@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Medicine;
+use App\Models\MedicineOrder;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +14,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('order_details', function (Blueprint $table) {
-            $table->id();
+            $table->foreignIdFor(MedicineOrder::class ,'orders_code');
+            $table->foreignIdFor(Medicine::class, 'medicine_id');
+            $table->integer('quantity');
+            $table->double('unit_price');
+            $table->double('subtotal');
             $table->timestamps();
         });
     }
