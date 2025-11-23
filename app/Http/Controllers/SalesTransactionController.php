@@ -13,7 +13,7 @@ class SalesTransactionController extends Controller
      */
     public function index()
     {
-        //
+        return view('admin.transaction.cashier_menu');
     }
 
     /**

@@ -221,6 +221,7 @@ document.getElementById("medicineForm").addEventListener("submit", (e) => {
   if (editingMedicineId) {
     // Update existing medicine
     const index = medicines.findIndex((m) => m.id === editingMedicineId);
+    console.log(index);
     if (index !== -1) {
       medicines[index] = { ...medicines[index], ...formData };
     }
