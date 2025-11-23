@@ -19,20 +19,20 @@ const statusField = document.getElementById('status-field');
 function getRoleBadge(role) {
     let className = '';
     if (role === 'Admin') {
-        className = 'bg-primary text-primary-foreground';
+        className = 'badge-role-admin';
     } else if (role === 'Pharmacist') {
-        className = 'bg-accent text-accent-foreground';
+        className = 'badge-role-pharmacist';
     } else if (role === 'Cashier') {
-        className = 'bg-secondary text-secondary-foreground border border-primary/20';
+        className = 'badge-role-cashier';
     }
     return `<span class="badge-base ${className}">${role}</span>`;
 }
 
 function getStatusBadge(status) {
     if (status === 'Active') {
-        return `<span class="badge-base border border-green-500 text-green-600 bg-green-50/50">Active</span>`;
+        return `<span class="badge-base badge-status-active">Active</span>`;
     } else {
-        return `<span class="badge-base border border-gray-400 text-gray-600 bg-gray-200/50">Inactive</span>`;
+        return `<span class="badge-base badge-status-inactive">Inactive</span>`;
     }
 }
 
@@ -100,7 +100,7 @@ function handleFormSubmit(event) {
             } : user
         );
     } else {
-        // Add new user
+        
         const newUser = {
             id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
             ...userData,
@@ -128,29 +128,30 @@ function renderTable(searchTerm = searchInput.value) {
 
     userTableBody.innerHTML = ''; 
 
+    const noUsersMessage = document.getElementById('no-users-message');
     if (filteredUsers.length === 0) {
-        document.getElementById('no-users-message').classList.remove('hidden');
-        document.getElementById('no-users-message').textContent = 'Tidak ada pengguna yang ditemukan sesuai dengan istilah pencarian Anda.';
+        noUsersMessage.classList.remove('hidden');
+        noUsersMessage.textContent = 'Tidak ada pengguna yang ditemukan sesuai dengan istilah pencarian Anda.';
     } else {
-        document.getElementById('no-users-message').classList.add('hidden');
+        noUsersMessage.classList.add('hidden');
     }
 
 
     filteredUsers.forEach(user => {
         const row = document.createElement('tr');
-        row.className = 'hover:bg-muted/50 transition-colors';
+        row.className = 'table-row-hover'; 
         row.innerHTML = `
-            <td class="p-4 align-middle font-medium">${user.name}</td>
-            <td class="p-4 align-middle text-muted-foreground">${user.email}</td>
-            <td class="p-4 align-middle">${getRoleBadge(user.role)}</td>
-            <td class="p-4 align-middle">${getStatusBadge(user.status)}</td>
-            <td class="p-4 align-middle text-muted-foreground">${user.lastLogin}</td>
-            <td class="p-4 align-middle">
-                <div class="flex gap-1">
-                    <button class="btn-base btn-ghost p-2 h-8 w-8 text-primary" onclick="openFormModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+            <td class="table-body-cell font-medium">${user.name}</td>
+            <td class="table-body-cell text-muted-foreground">${user.email}</td>
+            <td class="table-body-cell">${getRoleBadge(user.role)}</td>
+            <td class="table-body-cell">${getStatusBadge(user.status)}</td>
+            <td class="table-body-cell text-muted-foreground">${user.lastLogin}</td>
+            <td class="table-body-cell">
+                <div class="action-buttons-group">
+                    <button class="btn-base btn-ghost action-button-icon text-primary" onclick="openFormModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
                         <i data-lucide="edit" class="h-4 w-4"></i>
                     </button>
-                    <button class="btn-base btn-ghost p-2 h-8 w-8 text-destructive" onclick="handleDeleteUser(${user.id})">
+                    <button class="btn-base btn-ghost action-button-icon text-destructive" onclick="handleDeleteUser(${user.id})">
                         <i data-lucide="trash-2" class="h-4 w-4"></i>
                     </button>
                 </div>
@@ -159,6 +160,7 @@ function renderTable(searchTerm = searchInput.value) {
         userTableBody.appendChild(row);
     });
 
+    
     lucide.createIcons();
 }
 
