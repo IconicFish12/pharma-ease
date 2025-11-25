@@ -12,16 +12,14 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    protected $table = 'users';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $guarded = [ '$id' ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -32,6 +30,8 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public $incrementing = false;
 
     /**
      * Get the attributes that should be cast.
@@ -45,4 +45,13 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function medicineOrder() {
+        return $this->hasMany(MedicineOrder::class);
+    }
+
+    public function sales() {
+        return $this->hasMany(SalesTransaction::class);
+    }
+
 }

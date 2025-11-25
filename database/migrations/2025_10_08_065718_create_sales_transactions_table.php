@@ -13,11 +13,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('sales_transactions', function (Blueprint $table) {
-            $table->string('kode_penjualan');
-            $table->foreignIdFor(User::class, 'user_id');
+            $table->uuid('sales_id')->primary(true);
+            $table->string('kode_penjualan')->unique();
+            $table->foreignUuid('user_id')->constrained('users', 'user_id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->date('trancation_date');
             $table->double('total_price');
-            
             $table->timestamps();
         });
     }

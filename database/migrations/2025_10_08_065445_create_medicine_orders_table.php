@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\Supplier;
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('medicine_orders', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('order_id')->primary(true);
             $table->string('order_code')->unique();
-            $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('supplier_id')->constrained('suppliers');
+            $table->foreignUuid('user_id')->constrained('users', 'user_id')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignUuid('supplier_id')->constrained('suppliers', 'supplier_id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamp('order_date');
             $table->decimal('total_price', 15, 2);
             $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending');

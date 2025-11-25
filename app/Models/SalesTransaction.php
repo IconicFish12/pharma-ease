@@ -2,11 +2,43 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class SalesTransaction extends Model
 {
     /** @use HasFactory<\Database\Factories\SalesTransactionFactory> */
+    use HasUuids;
     use HasFactory;
+
+    protected $table = 'sales_transactions';
+
+    protected $primaryKey = 'sales_id';
+
+    protected $guarded = ['sales_id', 'kode_penjualan'];
+
+    public $incrementing = false;
+
+    public function user() {
+        return $this->belongsTo(
+            User::class,
+            'user_id',
+        );
+    }
+
+    public function medicines(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Medicine::class,
+            'transaction_details',
+            'sales_id',
+            'medicine_id'
+        )
+        ->using(TransactionDetails::class)
+        ->withPivot(['quantity', 'unit_price', 'subtotal'])
+        ->withTimestamps();
+    }
+
 }

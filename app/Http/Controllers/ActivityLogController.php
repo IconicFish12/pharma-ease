@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ActivityLog;
 use App\Http\Requests\StoreActivityLogRequest;
 use App\Http\Requests\UpdateActivityLogRequest;
 
@@ -35,7 +34,7 @@ class ActivityLogController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ActivityLog $activityLog)
+    public function show()
     {
         //
     }
@@ -43,7 +42,7 @@ class ActivityLogController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ActivityLog $activityLog)
+    public function edit()
     {
         //
     }
@@ -51,7 +50,7 @@ class ActivityLogController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateActivityLogRequest $request, ActivityLog $activityLog)
+    public function update(UpdateActivityLogRequest $request, )
     {
         //
     }
@@ -59,7 +58,7 @@ class ActivityLogController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ActivityLog $activityLog)
+    public function destroy()
     {
         //
     }

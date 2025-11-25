@@ -14,8 +14,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('transaction_details', function (Blueprint $table) {
-            $table->foreignIdFor(SalesTransaction::class, 'kode_penjualan');
-            $table->foreignIdFor(User::class, 'user_id');
+            $table->foreignUuid('sales_id')->constrained('sales_transactions', 'sales_id')->cascadeOnDelete();
+            $table->foreignUuid('medicine_id')->constrained('medicines', 'medicine_id')->cascadeOnDelete();
+            $table->primary(['sales_id', 'medicine_id']);
             $table->integer('quantity');
             $table->double('unit_price');
             $table->double('subtotal');
