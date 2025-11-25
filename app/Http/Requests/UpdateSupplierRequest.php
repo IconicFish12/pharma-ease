@@ -11,7 +11,7 @@ class UpdateSupplierRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,8 +21,24 @@ class UpdateSupplierRequest extends FormRequest
      */
     public function rules(): array
     {
+
         return [
-            //
+            'supplier_name' => 'required|string|max:255',
+            'contact_person' => 'required|string|max:255',
+            // FORMAT: unique:table,column,ignore_value,ignore_column_name
+            'phone_number' => 'required|string|max:20|unique:suppliers',
+            'address' => 'required|string',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'supplier_name.required' => 'Nama supplier wajib diisi.',
+            'contact_person.required' => 'Nama kontak person wajib diisi.',
+            'phone_number.required' => 'Nomor telepon wajib diisi.',
+            'phone_number.unique' => 'Nomor telepon ini sudah digunakan supplier lain.',
+            'address.required' => 'Alamat wajib diisi.',
         ];
     }
 }

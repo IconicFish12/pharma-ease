@@ -13,7 +13,12 @@ class MedicineCategoryController extends Controller
      */
     public function index()
     {
-        return view('admin.medicine.medicine_category');
+        return view('admin.medicine.medicine_category', [
+            'title' => 'Medicine Category',
+            'mainHeader' => 'Medicine Category',
+            'subHeader' => 'Kategori Obat yang tersedia di Apotek Lamtama',
+            'dataArr' => MedicineCategory::all(),
+        ]);
     }
 
     /**
@@ -29,7 +34,18 @@ class MedicineCategoryController extends Controller
      */
     public function store(StoreMedicineCategoryRequest $request)
     {
-        //
+        if($request->validated()){
+            $data = $request->all();
+
+            MedicineCategory::create([
+                'name' => $data['name'],
+                'description' => $data['description']
+            ]);
+
+            $request->session()->flash('success', 'Data Berhasil dibuat');
+
+            return back();
+        }
     }
 
     /**
@@ -53,7 +69,25 @@ class MedicineCategoryController extends Controller
      */
     public function update(UpdateMedicineCategoryRequest $request, MedicineCategory $medicineCategory)
     {
-        //
+        if ($request->validated()) {
+            if ($request->name == $medicineCategory->name && $request->description == $medicineCategory->description) {
+                $request->session()->flash('success', 'tidak ada data yang diubah');
+
+                return back();
+            }
+
+            $data = $request->all();
+
+
+            $medicineCategory->find($medicineCategory->category_id)->update([
+                'name' => $data['name'],
+                'description' => $data['description']
+            ]);
+
+            $request->session()->flash('success', 'Data Berhasil diubah');
+
+            return back();
+        }
     }
 
     /**
@@ -61,6 +95,10 @@ class MedicineCategoryController extends Controller
      */
     public function destroy(MedicineCategory $medicineCategory)
     {
-        //
+        if ($medicineCategory->destroy($medicineCategory->category_id)) {
+            request()->session()->flash('success', "Data Berhasil dihapus");
+
+            return back();
+        }
     }
 }
