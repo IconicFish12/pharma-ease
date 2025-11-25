@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Medicine;
 use App\Http\Requests\StoreMedicineRequest;
 use App\Http\Requests\UpdateMedicineRequest;
+use App\Models\MedicineCategory;
+use App\Models\Supplier;
 
 class MedicineController extends Controller
 {
@@ -13,7 +15,15 @@ class MedicineController extends Controller
      */
     public function index()
     {
-        return view('admin.medicine.medicine_inventory');
+        // dd(Medicine::with(['medicineCategory', 'supplier'])->get()->count());
+        return view('admin.medicine.medicine_inventory', [
+            'title' => 'Medicine Storage',
+            'mainHeader' => 'Medicine Storage',
+            'subHeader' => 'Tempat Penyimpanan Obat Apotek Lamtama',
+            'dataArr' => Medicine::with(['medicineCategory', 'supplier'])->get(),
+            'category'=> MedicineCategory::all(),
+            'supplier'=> Supplier::all()
+        ]);
     }
 
     /**
@@ -29,7 +39,7 @@ class MedicineController extends Controller
      */
     public function store(StoreMedicineRequest $request)
     {
-        //
+        dd($request->all());
     }
 
     /**

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Pharma Ease')</title>
+    <title>{{ $title ?? 'Pharma Ease' }}</title>
 
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -34,7 +34,20 @@
 
             <!-- Main Scrollable Content -->
             <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-muted/20">
-                @yield('admin-dashboard')
+
+                <div class="space-y-6">
+                    <!-- Header -->
+                    <div>
+                        {{-- <h2 class="text-3xl font-bold tracking-tight text-foreground">Dashboard</h2>
+                        <p class="text-muted-foreground">Manage your pharmacy operations efficiently</p> --}}
+                        <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ $mainHeader ?? null}}</h2>
+                        <p class="text-muted-foreground">{{ $subHeader ?? null }}</p>
+                    </div>
+
+
+                    @yield('admin-dashboard')
+
+                </div>
                 {{-- Gunakan 'content' atau nama section lain jika untuk halaman selain dashboard --}}
             </main>
         </div>
