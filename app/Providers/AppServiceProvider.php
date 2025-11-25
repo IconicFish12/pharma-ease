@@ -21,15 +21,66 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $menuItems = [
-            ['id' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'layout-dashboard', 'route' => 'dashboard'],
-            ['id' => 'inventory', 'label' => 'Inventory', 'icon' => 'package', 'route' => 'inventory'],
-            ['id' => 'cashier', 'label' => 'Cashier/POS', 'icon' => 'credit-card', 'route' => 'cashier'],
-            ['id' => 'users', 'label' => 'User Management', 'icon' => 'users', 'route' => 'users'],
-            ['id' => 'suppliers', 'label' => 'Suppliers', 'icon' => 'truck', 'route' => 'suppliers'],
-            ['id' => 'purchase-orders', 'label' => 'Purchase Orders', 'icon' => 'shopping-cart', 'route' => 'purchase-orders'],
-            ['id' => 'transactions', 'label' => 'Transaction Summary', 'icon' => 'receipt', 'route' => 'transactions'],
-            ['id' => 'audit', 'label' => 'Audit Log', 'icon' => 'shield', 'route' => 'audit'],
-            ['id' => 'reports', 'label' => 'Reports', 'icon' => 'file-text', 'route' => 'reports'],
+            [
+                'id' => 'dashboard',
+                'label' => 'Dashboard',
+                'icon' => 'layout-dashboard',
+                'route' => 'admin.dashboard',
+                'active_pattern' => 'dashboard',
+            ],
+            [
+                'id' => 'inventory',
+                'label' => 'Inventory',
+                'icon' => 'briefcase-medical',
+                'active_pattern' => 'inventory*',
+                // Ini akan memanggil route('admin.medicines.index')
+                'route' => 'admin.medicine'
+            ],
+            [
+                'id' => 'cashier',
+                'label' => 'Cashier/POS',
+                'icon' => 'credit-card',
+                'active_pattern' => 'pos*',
+                'route' => 'admin.cashier-menu'
+            ],
+            [
+                'id' => 'users',
+                'label' => 'User Management',
+                'icon' => 'users',
+                'route' => 'admin.users-data'
+            ],
+            [
+                'id' => 'suppliers',
+                'label' => 'Suppliers',
+                'icon' => 'truck',
+                'route' => 'admin.suppliers-data'
+            ],
+            [
+                'id' => 'purchase-orders',
+                'label' => 'Purchase Orders',
+                'icon' => 'shopping-cart',
+                'route' => 'admin.medicine-order'
+            ],
+            // Transactions summary mungkin belum ada controllernya di web.php kamu?
+            // Saya asumsikan ini pakai sales index juga atau controller lain
+            // [
+            //     'id' => 'transactions',
+            //     'label' => 'Transaction Summary',
+            //     'icon' => 'receipt',
+            //     'route' => 'admin.sales'
+            // ],
+            [
+                'id' => 'activity',
+                'label' => 'Activity Log',
+                'icon' => 'shield',
+                'route' => 'admin.activity-log'
+            ],
+            [
+                'id' => 'reports',
+                'label' => 'Reports',
+                'icon' => 'file-text',
+                'route' => 'admin.pharmacy-report'
+            ],
         ];
 
         View::share('menuItems', $menuItems);

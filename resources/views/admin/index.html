@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Pharma Ease Dashboard</title>
+        <!-- Tailwind CSS (CDN for preview only - in your Laravel app use your vite build) -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- Configuring Tailwind to match your variables -->
+        <script>
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            background: "var(--background)",
+                            foreground: "var(--foreground)",
+                            sidebar: {
+                                DEFAULT: "var(--sidebar)",
+                                foreground: "var(--sidebar-foreground)",
+                                primary: "var(--sidebar-primary)",
+                                "primary-foreground":
+                                    "var(--sidebar-primary-foreground)",
+                            },
+                            muted: {
+                                DEFAULT: "var(--muted)",
+                                foreground: "var(--muted-foreground)",
+                            },
+                            border: "var(--border)",
+                            destructive: {
+                                DEFAULT: "var(--destructive)",
+                                foreground: "var(--destructive-foreground)",
+                            },
+                            chart: {
+                                1: "var(--chart-1)",
+                                2: "var(--chart-2)",
+                                4: "var(--chart-4)",
+                            },
+                        },
+                    },
+                },
+            };
+        </script>
+
+        <style>
+            /* CSS Variables from your app.css */
+            :root {
+                --background: #ffffff;
+                --foreground: #1a1a1a;
+                --muted: #f3f4f6;
+                --muted-foreground: #6b7280;
+                --border: #e5e7eb;
+
+                /* Sidebar Colors */
+                --sidebar: #0f6643;
+                --sidebar-foreground: #ffffff;
+                --sidebar-primary: #3b82f6; /* Adjusted to match screenshot blue */
+                --sidebar-primary-foreground: #ffffff;
+
+                /* Chart Colors */
+                --chart-1: #60a5fa;
+                --chart-2: #0f6643;
+                --chart-4: #f59e0b;
+
+                --destructive: #ef4444;
+                --destructive-foreground: #ffffff;
+            }
+
+            /* Utility for hiding scrollbar */
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        </style>
+    </head>
+    <body
+        class="bg-muted/30 text-foreground font-sans antialiased overflow-hidden"
+    >
+        <div class="flex h-screen w-full relative" id="app">
+            <!-- SIDEBAR (Mobile Overlay) -->
+            <div
+                id="mobile-overlay"
+                onclick="toggleSidebar()"
+                class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden transition-opacity"
+            ></div>
+
+            <!-- SIDEBAR -->
+            <aside
+                id="sidebar"
+                class="fixed inset-y-0 left-0 z-30 w-64 transform -translate-x-full lg:translate-x-0 lg:static lg:block transition-transform duration-300 ease-in-out bg-sidebar text-sidebar-foreground flex flex-col"
+            >
+                <!-- Sidebar Header -->
+                <div
+                    class="h-16 flex items-center gap-2 px-6 border-b border-white/10"
+                >
+                    <!-- Logo Icon -->
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-6 w-6"
+                    >
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                    </svg>
+                    <div class="flex flex-col">
+                        <span
+                            class="font-bold text-lg tracking-tight leading-none"
+                            >Pharma Ease</span
+                        >
+                        <span
+                            class="text-[10px] opacity-70 leading-none font-light"
+                            >Pharmacy Management</span
+                        >
+                    </div>
+                </div>
+
+                <!-- Sidebar Navigation -->
+                <div
+                    class="flex-1 overflow-y-auto py-4 px-3 space-y-1 no-scrollbar"
+                >
+                    <!-- Dashboard (Active State) -->
+                    <a
+                        href="#"
+                        class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium bg-sidebar-primary text-sidebar-primary-foreground transition-colors shadow-sm"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-4 w-4"
+                        >
+                            <rect width="7" height="9" x="3" y="3" rx="1" />
+                            <rect width="7" height="5" x="14" y="3" rx="1" />
+                            <rect width="7" height="9" x="14" y="12" rx="1" />
+                            <rect width="7" height="5" x="3" y="16" rx="1" />
+                        </svg>
+                        Dashboard
+                    </a>
+
+                    <!-- Inventory -->
+                    <a
+                        href="#"
+                        class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-white/10 transition-colors"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-4 w-4"
+                        >
+                            <path
+                                d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"
+                            />
+                            <path d="m3.3 7 8.7 5 8.7-5" />
+                            <path d="M12 22V12" />
+                        </svg>
+                        Inventory
+                    </a>
+
+                    <!-- Cashier/POS -->
+                    <a
+                        href="#"
+                        class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-white/10 transition-colors"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-4 w-4"
+                        >
+                            <rect width="20" height="14" x="2" y="5" rx="2" />
+                            <line x1="2" x2="22" y1="10" y2="10" />
+                        </svg>
+                        Cashier/POS
+                    </a>
+
+                    <!-- User Management -->
+                    <a
+                        href="#"
+                        class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-white/10 transition-colors"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-4 w-4"
+                        >
+                            <path
+                                d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                            />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                        User Management
+                    </a>
+
+                    <!-- Suppliers -->
+                    <a
+                        href="#"
+                        class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-white/10 transition-colors"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-4 w-4"
+                        >
+                            <path d="M10 17h4V5H2v12h3" />
+                            <path
+                                d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5"
+                            />
+                            <path d="M14 17h1" />
+                            <circle cx="7.5" cy="17.5" r="2.5" />
+                            <circle cx="17.5" cy="17.5" r="2.5" />
+                        </svg>
+                        Suppliers
+                    </a>
+
+                    <!-- Purchase Orders -->
+                    <a
+                        href="#"
+                        class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-white/10 transition-colors"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-4 w-4"
+                        >
+                            <circle cx="8" cy="21" r="1" />
+                            <circle cx="19" cy="21" r="1" />
+                            <path
+                                d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"
+                            />
+                        </svg>
+                        Purchase Orders
+                    </a>
+
+                    <!-- Transaction Summary -->
+                    <a
+                        href="#"
+                        class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-white/10 transition-colors"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-4 w-4"
+                        >
+                            <path d="M12 2v20" />
+                            <path
+                                d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                            />
+                        </svg>
+                        Transaction Summary
+                    </a>
+
+                    <!-- Audit Log -->
+                    <a
+                        href="#"
+                        class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-white/10 transition-colors"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-4 w-4"
+                        >
+                            <path
+                                d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"
+                            />
+                        </svg>
+                        Audit Log
+                    </a>
+
+                    <!-- Reports -->
+                    <a
+                        href="#"
+                        class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-white/10 transition-colors"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-4 w-4"
+                        >
+                            <path
+                                d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
+                            />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" x2="8" y1="13" y2="13" />
+                            <line x1="16" x2="8" y1="17" y2="17" />
+                            <line x1="10" x2="8" y1="9" y2="9" />
+                        </svg>
+                        Reports
+                    </a>
+                </div>
+
+                <!-- Sidebar Footer -->
+                <div
+                    class="p-4 border-t border-white/10 text-xs text-center opacity-60"
+                >
+                    <p>&copy; 2025 Pharma Ease</p>
+                    <p>v1.0.0</p>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT AREA -->
+            <div class="flex flex-col flex-1 overflow-hidden h-full">
+                <!-- HEADER -->
+                <header
+                    class="h-16 flex items-center justify-between gap-4 border-b bg-background px-6 shadow-sm shrink-0"
+                >
+                    <!-- Left: Sidebar Toggle (Mobile) & Title Placeholder -->
+                    <div class="flex items-center gap-4">
+                        <button
+                            onclick="toggleSidebar()"
+                            class="lg:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <line x1="4" x2="20" y1="12" y2="12" />
+                                <line x1="4" x2="20" y1="6" y2="6" />
+                                <line x1="4" x2="20" y1="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Right: Notifications & Profile -->
+                    <div class="flex items-center gap-4">
+                        <!-- Notification Icon -->
+                        <button
+                            class="relative p-2 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-muted"
+                        >
+                            <span
+                                class="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"
+                            ></span>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"
+                                />
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                            </svg>
+                        </button>
+
+                        <!-- User Dropdown Trigger -->
+                        <div
+                            class="flex items-center gap-3 pl-4 border-l cursor-pointer"
+                        >
+                            <div
+                                class="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar text-sidebar-foreground font-medium text-sm"
+                            >
+                                IS
+                            </div>
+                            <div class="hidden md:block text-sm">
+                                <p class="font-medium text-foreground">
+                                    Ibnu Syawal
+                                </p>
+                                <p class="text-xs text-muted-foreground">
+                                    Admin
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- MAIN SCROLLABLE CONTENT -->
+                <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-muted/20">
+                    <!-- CONTENT FROM DASHBOARD_INDEX.BLADE.PHP GOES HERE -->
+
+                    <div class="space-y-6">
+                        <!-- Header -->
+                        <div>
+                            <h2
+                                class="text-3xl font-bold tracking-tight text-foreground"
+                            >
+                                Dashboard
+                            </h2>
+                            <p class="text-muted-foreground">
+                                Manage your pharmacy operations efficiently
+                            </p>
+                        </div>
+
+                        <!-- Stats Grid -->
+                        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                            <!-- Card 1 -->
+                            <div
+                                class="rounded-xl border bg-white p-6 shadow-sm"
+                            >
+                                <div
+                                    class="flex items-center justify-between pb-2"
+                                >
+                                    <h3
+                                        class="text-sm font-medium text-muted-foreground"
+                                    >
+                                        Total Medicines
+                                    </h3>
+                                    <svg
+                                        class="h-4 w-4 text-muted-foreground"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="text-2xl font-bold text-foreground">
+                                    1,284
+                                </div>
+                                <p class="text-xs text-muted-foreground">
+                                    <span class="text-green-600 font-medium"
+                                        >+12%</span
+                                    >
+                                    from last month
+                                </p>
+                            </div>
+                            <!-- Card 2 -->
+                            <div
+                                class="rounded-xl border bg-white p-6 shadow-sm"
+                            >
+                                <div
+                                    class="flex items-center justify-between pb-2"
+                                >
+                                    <h3
+                                        class="text-sm font-medium text-muted-foreground"
+                                    >
+                                        Low Stock Items
+                                    </h3>
+                                    <svg
+                                        class="h-4 w-4 text-orange-500"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="text-2xl font-bold text-foreground">
+                                    23
+                                </div>
+                                <p class="text-xs text-muted-foreground">
+                                    Requires immediate attention
+                                </p>
+                            </div>
+                            <!-- Card 3 -->
+                            <div
+                                class="rounded-xl border bg-white p-6 shadow-sm"
+                            >
+                                <div
+                                    class="flex items-center justify-between pb-2"
+                                >
+                                    <h3
+                                        class="text-sm font-medium text-muted-foreground"
+                                    >
+                                        Total Revenue
+                                    </h3>
+                                    <svg
+                                        class="h-4 w-4 text-muted-foreground"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="text-2xl font-bold text-foreground">
+                                    $186,450
+                                </div>
+                                <p class="text-xs text-muted-foreground">
+                                    <span class="text-green-600 font-medium"
+                                        >+18%</span
+                                    >
+                                    from last month
+                                </p>
+                            </div>
+                            <!-- Card 4 -->
+                            <div
+                                class="rounded-xl border bg-white p-6 shadow-sm"
+                            >
+                                <div
+                                    class="flex items-center justify-between pb-2"
+                                >
+                                    <h3
+                                        class="text-sm font-medium text-muted-foreground"
+                                    >
+                                        Total Transactions
+                                    </h3>
+                                    <svg
+                                        class="h-4 w-4 text-muted-foreground"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="text-2xl font-bold text-foreground">
+                                    1,745
+                                </div>
+                                <p class="text-xs text-muted-foreground">
+                                    <span class="text-green-600 font-medium"
+                                        >+7%</span
+                                    >
+                                    from last month
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Charts Grid -->
+                        <div class="grid gap-6 lg:grid-cols-2">
+                            <!-- Sales Chart -->
+                            <div
+                                class="rounded-xl border bg-white shadow-sm p-6"
+                            >
+                                <h3 class="font-semibold mb-4">
+                                    Sales Chart (Last 30 Days)
+                                </h3>
+                                <div
+                                    class="h-[250px] w-full flex items-end gap-2"
+                                >
+                                    <!-- Mock SVG Chart -->
+                                    <svg
+                                        viewBox="0 0 400 200"
+                                        class="w-full h-full overflow-visible"
+                                    >
+                                        <g
+                                            class="stroke-gray-200"
+                                            stroke-dasharray="4 4"
+                                            stroke-width="1"
+                                        >
+                                            <line
+                                                x1="40"
+                                                y1="0"
+                                                x2="40"
+                                                y2="180"
+                                            />
+                                            <line
+                                                x1="120"
+                                                y1="0"
+                                                x2="120"
+                                                y2="180"
+                                            />
+                                            <line
+                                                x1="200"
+                                                y1="0"
+                                                x2="200"
+                                                y2="180"
+                                            />
+                                            <line
+                                                x1="280"
+                                                y1="0"
+                                                x2="280"
+                                                y2="180"
+                                            />
+                                            <line
+                                                x1="360"
+                                                y1="0"
+                                                x2="360"
+                                                y2="180"
+                                            />
+                                            <line
+                                                x1="40"
+                                                y1="180"
+                                                x2="360"
+                                                y2="180"
+                                            />
+                                            <line
+                                                x1="40"
+                                                y1="120"
+                                                x2="360"
+                                                y2="120"
+                                            />
+                                            <line
+                                                x1="40"
+                                                y1="60"
+                                                x2="360"
+                                                y2="60"
+                                            />
+                                        </g>
+                                        <path
+                                            d="M40 120 C 80 110, 100 130, 120 110 S 160 80, 200 90 S 260 50, 300 60 S 340 80, 360 70"
+                                            fill="none"
+                                            stroke="#60A5FA"
+                                            stroke-width="3"
+                                        />
+                                        <circle
+                                            cx="40"
+                                            cy="120"
+                                            r="3"
+                                            fill="white"
+                                            stroke="#60A5FA"
+                                            stroke-width="2"
+                                        />
+                                        <circle
+                                            cx="120"
+                                            cy="110"
+                                            r="3"
+                                            fill="white"
+                                            stroke="#60A5FA"
+                                            stroke-width="2"
+                                        />
+                                        <circle
+                                            cx="200"
+                                            cy="90"
+                                            r="3"
+                                            fill="white"
+                                            stroke="#60A5FA"
+                                            stroke-width="2"
+                                        />
+                                        <circle
+                                            cx="360"
+                                            cy="70"
+                                            r="3"
+                                            fill="white"
+                                            stroke="#60A5FA"
+                                            stroke-width="2"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Transactions Chart -->
+                            <div
+                                class="rounded-xl border bg-white shadow-sm p-6"
+                            >
+                                <h3 class="font-semibold mb-4">
+                                    Transaction Chart (Last 30 Days)
+                                </h3>
+                                <div class="h-[250px] w-full">
+                                    <svg
+                                        viewBox="0 0 400 200"
+                                        class="w-full h-full overflow-visible"
+                                    >
+                                        <g
+                                            class="stroke-gray-200"
+                                            stroke-dasharray="4 4"
+                                            stroke-width="1"
+                                        >
+                                            <line
+                                                x1="40"
+                                                y1="0"
+                                                x2="40"
+                                                y2="180"
+                                            />
+                                            <line
+                                                x1="120"
+                                                y1="0"
+                                                x2="120"
+                                                y2="180"
+                                            />
+                                            <line
+                                                x1="200"
+                                                y1="0"
+                                                x2="200"
+                                                y2="180"
+                                            />
+                                            <line
+                                                x1="280"
+                                                y1="0"
+                                                x2="280"
+                                                y2="180"
+                                            />
+                                            <line
+                                                x1="360"
+                                                y1="0"
+                                                x2="360"
+                                                y2="180"
+                                            />
+                                            <line
+                                                x1="40"
+                                                y1="180"
+                                                x2="360"
+                                                y2="180"
+                                            />
+                                            <line
+                                                x1="40"
+                                                y1="120"
+                                                x2="360"
+                                                y2="120"
+                                            />
+                                            <line
+                                                x1="40"
+                                                y1="60"
+                                                x2="360"
+                                                y2="60"
+                                            />
+                                        </g>
+                                        <path
+                                            d="M40 130 C 80 110, 100 120, 120 125 S 160 90, 200 80 S 260 90, 300 60 S 340 70, 360 75"
+                                            fill="none"
+                                            stroke="#0F6643"
+                                            stroke-width="3"
+                                        />
+                                        <circle
+                                            cx="40"
+                                            cy="130"
+                                            r="3"
+                                            fill="white"
+                                            stroke="#0F6643"
+                                            stroke-width="2"
+                                        />
+                                        <circle
+                                            cx="120"
+                                            cy="125"
+                                            r="3"
+                                            fill="white"
+                                            stroke="#0F6643"
+                                            stroke-width="2"
+                                        />
+                                        <circle
+                                            cx="360"
+                                            cy="75"
+                                            r="3"
+                                            fill="white"
+                                            stroke="#0F6643"
+                                            stroke-width="2"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nearing Expiry -->
+                        <div
+                            class="rounded-xl border bg-white shadow-sm overflow-hidden"
+                        >
+                            <div class="p-6 border-b">
+                                <h3 class="font-semibold">
+                                    Medicines Nearing Expiry
+                                </h3>
+                            </div>
+                            <div class="p-6 space-y-4">
+                                <!-- Item 1 -->
+                                <div
+                                    class="flex items-center gap-4 rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                                >
+                                    <div
+                                        class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600"
+                                    >
+                                        <svg
+                                            class="h-5 w-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-medium text-red-600">
+                                            Paracetamol 500mg
+                                        </p>
+                                        <p
+                                            class="text-sm text-muted-foreground"
+                                        >
+                                            Expires: 2025-11-15
+                                        </p>
+                                    </div>
+                                    <div
+                                        class="text-sm font-medium text-red-600"
+                                    >
+                                        26 days left
+                                    </div>
+                                </div>
+                                <!-- Item 2 -->
+                                <div
+                                    class="flex items-center gap-4 rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                                >
+                                    <div
+                                        class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500"
+                                    >
+                                        <svg
+                                            class="h-5 w-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-700">
+                                            Amoxicillin 250mg
+                                        </p>
+                                        <p
+                                            class="text-sm text-muted-foreground"
+                                        >
+                                            Expires: 2025-11-20
+                                        </p>
+                                    </div>
+                                    <div
+                                        class="text-sm font-medium text-gray-500"
+                                    >
+                                        31 days left
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Script for simple mobile toggle -->
+        <script>
+            function toggleSidebar() {
+                const sidebar = document.getElementById("sidebar");
+                const overlay = document.getElementById("mobile-overlay");
+
+                // Check current transform state (or class)
+                if (sidebar.classList.contains("-translate-x-full")) {
+                    // Open
+                    sidebar.classList.remove("-translate-x-full");
+                    overlay.classList.remove("hidden");
+                } else {
+                    // Close
+                    sidebar.classList.add("-translate-x-full");
+                    overlay.classList.add("hidden");
+                }
+            }
+        </script>
+    </body>
+</html>
