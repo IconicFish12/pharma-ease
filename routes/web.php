@@ -23,8 +23,8 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::get('/', [MedicineController::class, 'index']);
         Route::post('/', [MedicineController::class, 'store']);
         Route::post('/show', [MedicineController::class, 'show']);
-        Route::put('/{medicine:id}', [MedicineController::class, 'update']);
-        Route::delete('/{medicine:id}', [MedicineController::class, 'destroy']);
+        Route::put('/{medicine:medicine_id}', [MedicineController::class, 'update']);
+        Route::delete('/{medicine:medicine_id}', [MedicineController::class, 'destroy']);
     });
 
 
@@ -32,8 +32,8 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::get('/', [MedicineCategoryController::class, 'index']);
         Route::post('/', [MedicineCategoryController::class, 'store']);
         Route::post('/show', [MedicineCategoryController::class, 'show']);
-        Route::put('/{medicineCategory:id}', [MedicineCategoryController::class, 'update']);
-        Route::delete('/{medicineCategory:id}', [MedicineCategoryController::class, 'destroy']);
+        Route::put('/{medicineCategory:category_id}', [MedicineCategoryController::class, 'update']);
+        Route::delete('/{medicineCategory:category_id}', [MedicineCategoryController::class, 'destroy']);
     });
 
     Route::prefix('/medicine-order')->name('medicine-order')->group(function(){
