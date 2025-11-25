@@ -13,7 +13,12 @@ class SupplierController extends Controller
      */
     public function index()
     {
-        return view('admin.supplier.supplier_management');
+        return view('admin.supplier.supplier_management', [
+            'title' => 'Suppliers List',
+            'mainHeader' => 'Suppliers List',
+            'subHeader' => 'List dari para pemasok obat pada Apotek Lamtama',
+            'dataArr' => Supplier::paginate(request()->has('paginate') ?? 15),
+        ]);
     }
 
     /**
@@ -29,7 +34,16 @@ class SupplierController extends Controller
      */
     public function store(StoreSupplierRequest $request)
     {
-        //
+        try {
+            Supplier::create($request->validated());
+
+            return redirect()->back()
+                             ->with('success', 'Supplier successfully added!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                             ->with('error', 'Failed to add supplier: ' . $e->getMessage())
+                             ->withInput();
+        }
     }
 
     /**
@@ -53,7 +67,23 @@ class SupplierController extends Controller
      */
     public function update(UpdateSupplierRequest $request, Supplier $supplier)
     {
-        //
+        try {
+            $data = $request->all();
+
+            $supplier->find($supplier->supplier_id)->update([
+                'supplier_name' => $data['supplier_name'],
+                'address' => $data['address'],
+                'contact_person' => $data['contact_person'],
+                'phone_number' => $data['phone_number'],
+            ]);
+
+            return redirect()->back()
+                             ->with('success', 'Supplier successfully updated!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                             ->with('error', 'Failed to update supplier: ' . $e->getMessage())
+                             ->withInput();
+        }
     }
 
     /**
@@ -61,6 +91,15 @@ class SupplierController extends Controller
      */
     public function destroy(Supplier $supplier)
     {
-        //
+        try {
+            $supplier = Supplier::findOrFail($supplier->supplier_id);
+            $supplier->delete();
+
+            return redirect()->route('admin.suppliers-data')
+                             ->with('success', 'Supplier successfully deleted!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                             ->with('error', 'Failed to delete supplier: ' . $e->getMessage());
+        }
     }
 }

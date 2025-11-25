@@ -40,8 +40,8 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::get('/', [MedicineOrderController::class, 'index']);
         Route::post('/', [MedicineOrderController::class, 'store']);
         Route::post('/show', [MedicineOrderController::class, 'show']);
-        Route::put('/{medicineOrder:id}', [MedicineOrderController::class, 'update']);
-        Route::delete('/{medicineOrder:id}', [MedicineOrderController::class, 'destroy']);
+        Route::put('/{medicineOrder:order_id}', [MedicineOrderController::class, 'update']);
+        Route::delete('/{medicineOrder:order_id}', [MedicineOrderController::class, 'destroy']);
     });
 
     Route::prefix('/activity-log')->name('activity-log')->group(function(){
@@ -56,16 +56,16 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::get('/', [SupplierController::class, 'index']);
         Route::post('/', [SupplierController::class, 'store']);
         Route::post('/show', [SupplierController::class, 'show']);
-        Route::put('/{supplier:id}', [SupplierController::class, 'update']);
-        Route::delete('/{supplier:id}', [SupplierController::class, 'destroy']);
+        Route::put('/{supplier:supplier_id}', [SupplierController::class, 'update']);
+        Route::delete('/{supplier:supplier_id}', [SupplierController::class, 'destroy']);
     });
 
     Route::prefix('/users')->name('users-data')->group(function(){
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
         Route::post('/show', [UserController::class, 'show']);
-        Route::put('/{user:id}', [UserController::class, 'update']);
-        Route::delete('/{user:id}', [UserController::class, 'destroy']);
+        Route::put('/{user:user_id}', [UserController::class, 'update']);
+        Route::delete('/{user:user-id}', [UserController::class, 'destroy']);
     });
 
     Route::prefix('/reports')->name('pharmacy-report')->group(function(){
