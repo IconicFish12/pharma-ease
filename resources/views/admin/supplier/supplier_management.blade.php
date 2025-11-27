@@ -1,10 +1,5 @@
 @extends('template.dashboard')
 @section('admin-dashboard')
-    {{--
-        x-data setup:
-        - editForm disesuaikan dengan kolom database supplier
-        - PERBAIKAN: Menggunakan item.supplier_id karena database tidak punya kolom 'id'
-    --}}
     <div x-data="{
         showAddModal: {{ $errors->any() && !old('id') ? 'true' : 'false' }},
         showEditModal: {{ $errors->any() && old('id') ? 'true' : 'false' }},
@@ -73,7 +68,7 @@
                     </form>
 
                     <button @click="showAddModal = true"
-                        class="h-9 px-4 inline-flex items-center justify-center gap-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors shadow-sm">
+                        class="h-9 px-4 inline-flex items-center justify-center gap-2 rounded-md bg-green-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors shadow-sm">
                         <x-dynamic-component component="lucide-plus" class="h-4 w-4" />
                         Add Supplier
                     </button>
@@ -109,14 +104,14 @@
                                     <div class="flex items-center justify-end gap-2">
                                         {{-- Tombol Edit --}}
                                         <button @click="openEditModal({{ json_encode($item) }})"
-                                            class="p-2 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
+                                            class="p-2 rounded-md text-orange-400 hover:bg-blue-50 transition-colors"
                                             title="Edit">
                                             <x-dynamic-component component="lucide-pencil" class="h-4 w-4" />
                                         </button>
 
                                         {{-- Tombol Delete --}}
                                         {{-- PERBAIKAN: Gunakan $item->supplier_id (bukan $item->id) --}}
-                                        <form action="{{ asset("/admin/suppliers-data/>$item->supplier_id") }}"
+                                        <form action="{{ asset("/admin/suppliers-data/$item->supplier_id") }}"
                                             method="POST"
                                             onsubmit="return confirm('Are you sure you want to delete this supplier?');">
                                             @csrf

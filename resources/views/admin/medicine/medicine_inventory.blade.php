@@ -1,44 +1,66 @@
 @extends('template.dashboard')
 @section('admin-dashboard')
-    {{--
-        x-data setup:
-        - showAddModal/showEditModal: kontrol visibilitas modal
-        - editForm: objek untuk menampung data obat yang sedang diedit
-        - openEditModal(item): fungsi untuk mengisi form edit saat tombol diklik
-    --}}
     <div x-data="{
-        showAddModal: false,
-        showEditModal: false,
+        showAddModal: {{ $errors->any() && !old('id') ? 'true' : 'false' }},
+        showEditModal: {{ $errors->any() && old('id') ? 'true' : 'false' }},
         search: '{{ request('search') }}',
         editForm: {
-            id: null,
-            medicine_name: '',
-            sku: '',
-            description: '',
-            category_id: '',
-            supplier_id: '',
-            stock: 0,
-            unit: '',
-            price: 0,
-            expired_date: ''
+            id: '{{ old('medicine_id') }}',
+            medicine_name: '{{ old('medicine_name') }}',
+            sku: '{{ old('sku') }}',
+            description: '{{ old('description') }}',
+            category_id: '{{ old('category_id') }}',
+            supplier_id: '{{ old('supplier_id') }}',
+            stock: '{{ old('stock') }}',
+            unit: '{{ old('unit') }}',
+            {{-- Tambahkan unit di sini --}}
+            price: '{{ old('price') }}',
+            expired_date: '{{ old('expired_date') }}'
         },
         openEditModal(item) {
             // Mapping data dari backend ke form edit alpine
             this.editForm = {
-                id: item.id,
+                id: item.medicine_id, // Perbaikan: Gunakan item.id (standard Laravel) kecuali PK custom
                 medicine_name: item.medicine_name,
                 sku: item.sku,
                 description: item.description,
-                category_id: item.category_id, // Pastikan controller mengirim category_id
-                supplier_id: item.supplier_id, // Pastikan controller mengirim supplier_id
+                category_id: item.category_id,
+                supplier_id: item.supplier_id,
                 stock: item.stock,
-                unit: item.unit,
+                unit: item.unit, // Mapping unit
                 price: item.price,
                 expired_date: item.expired_date
             };
             this.showEditModal = true;
         }
     }">
+
+        {{-- FLASH MESSAGE SESSION (AUTO HIDE) --}}
+        @if (session('success'))
+            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
+                x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3">
+                <x-dynamic-component component="lucide-check-circle" class="h-5 w-5 shrink-0 text-emerald-600" />
+                <div>
+                    <h4 class="font-semibold text-sm">Success</h4>
+                    <p class="text-sm">{{ session('success') }}</p>
+                </div>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
+                x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 flex items-center gap-3">
+                <x-dynamic-component component="lucide-alert-circle" class="h-5 w-5 shrink-0 text-red-600" />
+                <div>
+                    <h4 class="font-semibold text-sm">Error</h4>
+                    <p class="text-sm">{{ session('error') }}</p>
+                </div>
+            </div>
+        @endif
 
         <div class="bg-card rounded-xl border border-border shadow-sm">
 
@@ -53,19 +75,30 @@
                             class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <input type="text" name="search" placeholder="Search medicines..."
                             value="{{ request('search') }}"
-                            class="w-full h-9 pl-9 pr-4 rounded-md border border-input bg-background text-sm outline-none focus:ring-2 focus:ring-ring">
+                            class="w-full h-9 pl-9 pr-4 rounded-md border bg-background text-sm outline-none focus:ring-2 focus:ring-ring">
                     </form>
 
                     <button
-                        class="h-9 w-9 flex items-center justify-center rounded-md border border-input bg-background hover:bg-muted text-foreground transition-colors">
+                        class="h-9 w-9 flex items-center justify-center rounded-md border bg-background hover:bg-muted text-foreground transition-colors">
                         <x-dynamic-component component="lucide-filter" class="h-4 w-4" />
                     </button>
 
                     <button @click="showAddModal = true"
-                        class="h-9 px-4 inline-flex items-center justify-center gap-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors shadow-sm">
+                        class="h-9 px-4 inline-flex items-center justify-center gap-2 rounded-md bg-green-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors shadow-sm">
                         <x-dynamic-component component="lucide-plus" class="h-4 w-4" />
                         Add New Medicine
                     </button>
+
+                    {{-- Link ke Halaman Kategori (Opsional) --}}
+                    @if (Route::has('admin.medicine-category'))
+                        <a href="{{ route('admin.medicine-category') }}">
+                            <button
+                                class="h-9 px-2 inline-flex items-center justify-center gap-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors shadow-sm">
+                                <x-dynamic-component component="lucide-layout-grid" class="h-4 w-4" />
+                                Category
+                            </button>
+                        </a>
+                    @endif
                 </div>
             </div>
 
@@ -94,7 +127,6 @@
                                 </td>
                                 <td class="px-6 py-4 font-medium text-foreground">{{ $item->medicine_name }}</td>
                                 <td class="px-6 py-4 text-muted-foreground">{{ $item->sku }}</td>
-                                {{-- Gunakan optional() untuk mencegah error jika relasi null --}}
                                 <td class="px-6 py-4 text-foreground">{{ optional($item->category)->name ?? '-' }}</td>
                                 <td class="px-6 py-4 text-muted-foreground">
                                     {{ optional($item->supplier)->supplier_name ?? '-' }}</td>
@@ -123,14 +155,29 @@
                                     {{ $item->expired_date ? date('d M Y', strtotime($item->expired_date)) : '-' }}
                                 </td>
                                 <td class="px-6 py-4 text-foreground">
-                                    Rp {{ number_format($item->price, 0, ',', '.') }}
+                                    @money($item->price)
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    {{-- Tombol Edit: Mengirim data item ke fungsi Alpine --}}
-                                    <button @click="openEditModal({{ json_encode($item) }})"
-                                        class="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                                        Edit
-                                    </button>
+                                    <div class="flex items-center justify-end gap-2">
+                                        {{-- Tombol Edit --}}
+                                        <button @click="openEditModal({{ json_encode($item) }})"
+                                            class="p-2 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
+                                            title="Edit">
+                                            <x-dynamic-component component="lucide-pencil" class="h-4 w-4" />
+                                        </button>
+
+                                        {{-- Tombol Delete (Perbaikan: Ditambahkan) --}}
+                                        <form action="{{ asset("/admin/medicine/$item->medicine_id") }}" method="POST"
+                                            onsubmit="return confirm('Are you sure you want to delete this medicine?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="p-2 rounded-md text-red-600 hover:bg-red-50 transition-colors"
+                                                title="Delete">
+                                                <x-dynamic-component component="lucide-trash-2" class="h-4 w-4" />
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -148,9 +195,9 @@
             </div>
 
             {{-- PAGINATION SECTION --}}
-            {{-- <div class="p-4 border-t border-border">
+            <div class="p-4 border-t border-border">
                 {{ $dataArr->links() }}
-            </div> --}}
+            </div>
         </div>
 
 
@@ -188,28 +235,40 @@
 
                 {{-- FORM ADD --}}
                 <div class="p-6 overflow-y-auto space-y-4 custom-scrollbar">
-                    {{-- Ganti route('admin.medicine.store') sesuai route Anda --}}
+                    {{-- Pastikan route name sesuai di web.php --}}
                     <form action="{{ route('admin.medicine') }}" method="post">
                         @csrf
 
                         {{-- Name --}}
                         <div class="space-y-1.5 mb-4">
                             <label class="text-sm font-medium text-foreground">Medicine Name</label>
-                            <input type="text" name="medicine_name" placeholder="e.g., Paracetamol 500mg" required
-                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                            <input type="text" name="medicine_name" placeholder="e.g., Paracetamol 500mg"
+                                value="{{ old('medicine_name') }}"
+                                class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('medicine_name') border-red-500 @enderror">
+                            @error('medicine_name')
+                                <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                            @enderror
                         </div>
 
-                        {{-- Code & Price --}}
+                        {{-- SKU & Price --}}
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">SKU / Code</label>
-                                <input type="text" name="sku" placeholder="e.g., MED001" required
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                                <input type="text" name="sku" placeholder="e.g., MED001"
+                                    value="{{ old('sku') }}"
+                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('sku') border-red-500 @enderror">
+                                @error('sku')
+                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                                @enderror
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Price (Rp)</label>
-                                <input type="number" name="price" placeholder="e.g., 50000" required
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                                <input type="number" name="price" placeholder="e.g., 50000"
+                                    value="{{ old('price') }}"
+                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('price') border-red-500 @enderror">
+                                @error('price')
+                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
@@ -217,7 +276,10 @@
                         <div class="space-y-1.5 mb-4">
                             <label class="text-sm font-medium text-foreground">Description</label>
                             <textarea name="description" rows="2" placeholder="Optional description..."
-                                class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"></textarea>
+                                class="flex w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('description') border-red-500 @enderror">{{ old('description') }}</textarea>
+                            @error('description')
+                                <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         {{-- Category & Supplier --}}
@@ -225,63 +287,68 @@
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Category</label>
                                 <div class="relative">
-                                    <select name="category_id" required
-                                        class="flex h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                                    <select name="category_id"
+                                        class="flex h-10 w-full appearance-none rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('category_id') border-red-500 @enderror">
                                         <option value="" disabled selected>Select...</option>
-                                        {{-- Loop Categories dari Controller --}}
                                         @foreach ($categories ?? [] as $cat)
-                                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                            <option value="{{ $cat->category_id }}"
+                                                {{ old('category_id') == $cat->category_id ? 'selected' : '' }}>{{ $cat->name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     <x-dynamic-component component="lucide-chevron-down"
                                         class="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
                                 </div>
+                                @error('category_id')
+                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                                @enderror
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Supplier</label>
                                 <div class="relative">
-                                    <select name="supplier_id" required
-                                        class="flex h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                                    <select name="supplier_id"
+                                        class="flex h-10 w-full appearance-none rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('supplier_id') border-red-500 @enderror">
                                         <option value="" disabled selected>Select...</option>
-                                        {{-- Loop Suppliers dari Controller --}}
                                         @foreach ($suppliers ?? [] as $sup)
-                                            <option value="{{ $sup->id }}">{{ $sup->supplier_name }}</option>
+                                            <option value="{{ $sup->supplier_id }}"
+                                                {{ old('supplier_id') == $sup->supplier_id ? 'selected' : '' }}>
+                                                {{ $sup->supplier_name }}</option>
                                         @endforeach
                                     </select>
                                     <x-dynamic-component component="lucide-chevron-down"
                                         class="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
                                 </div>
+                                @error('supplier_id')
+                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
                         {{-- Quantity, Unit, Expiry --}}
-                        <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Quantity</label>
-                                <input type="number" name="stock" placeholder="100" required
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">Unit</label>
-                                <select name="unit" required
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
-                                    <option>Strip</option>
-                                    <option>Bottle</option>
-                                    <option>Box</option>
-                                    <option>Pcs</option>
-                                </select>
+                                <input type="number" name="stock" placeholder="100"
+                                    value="{{ old('stock') }}"
+                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('stock') border-red-500 @enderror">
+                                @error('stock')
+                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                                @enderror
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Expiry</label>
-                                <input type="date" name="expired_date" required
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                                <input type="date" name="expired_date"  value="{{ old('expired_date') }}"
+                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('expired_date') border-red-500 @enderror">
+                                @error('expired_date')
+                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
                         {{-- Footer Buttons --}}
                         <div class="pt-4 border-t border-border flex items-center justify-end gap-3">
                             <button type="button" @click="showAddModal = false"
-                                class="h-10 px-4 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground text-sm font-medium transition-colors">
+                                class="h-10 px-4 rounded-md border bg-background hover:bg-accent hover:text-accent-foreground text-sm font-medium transition-colors">
                                 Cancel
                             </button>
                             <button type="submit"
@@ -322,30 +389,40 @@
 
                 <div class="p-6 overflow-y-auto space-y-4 custom-scrollbar">
                     {{-- Form Edit Dynamic Action --}}
-                    {{-- Pastikan ada route 'admin.medicine.update' yang menerima ID --}}
-                    {{-- Contoh: Route::put('/admin/medicine/{id}', ...) --}}
-                    <form :action="'{{ url('admin/medicine') }}/' + editForm.id" method="post">
+                    <form :action="'{{ route('admin.medicine') }}/' + editForm.id" method="post">
                         @csrf
                         @method('PUT')
+
+                        {{-- Hidden ID untuk validasi unique ignore --}}
+                        <input type="hidden" name="medicine_id" x-model="editForm.id">
 
                         {{-- Name --}}
                         <div class="space-y-1.5 mb-4">
                             <label class="text-sm font-medium text-foreground">Medicine Name</label>
-                            <input type="text" name="medicine_name" x-model="editForm.medicine_name" required
-                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                            <input type="text" name="medicine_name" x-model="editForm.medicine_name"
+                                class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('medicine_name') border-red-500 @enderror">
+                            @error('medicine_name')
+                                <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         {{-- SKU & Price --}}
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">SKU / Code</label>
-                                <input type="text" name="sku" x-model="editForm.sku" required
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                                <input type="text" name="sku" x-model="editForm.sku"
+                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('sku') border-red-500 @enderror">
+                                @error('sku')
+                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                                @enderror
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Price (Rp)</label>
-                                <input type="number" name="price" x-model="editForm.price" required
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                                <input type="number" name="price" x-model="editForm.price"
+                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('price') border-red-500 @enderror">
+                                @error('price')
+                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
@@ -353,7 +430,10 @@
                         <div class="space-y-1.5 mb-4">
                             <label class="text-sm font-medium text-foreground">Description</label>
                             <textarea name="description" rows="2" x-model="editForm.description"
-                                class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"></textarea>
+                                class="flex w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('description') border-red-500 @enderror"></textarea>
+                            @error('description')
+                                <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         {{-- Category & Supplier --}}
@@ -361,61 +441,63 @@
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Category</label>
                                 <div class="relative">
-                                    <select name="category_id" x-model="editForm.category_id" required
-                                        class="flex h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                                    <select name="category_id" x-model="editForm.category_id"
+                                        class="flex h-10 w-full appearance-none rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('category_id') border-red-500 @enderror">
                                         <option value="" disabled>Select...</option>
                                         @foreach ($categories ?? [] as $cat)
-                                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                            <option value="{{ $cat->category_id }}">{{ $cat->name }}</option>
                                         @endforeach
                                     </select>
                                     <x-dynamic-component component="lucide-chevron-down"
                                         class="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
                                 </div>
+                                {{-- Perbaikan: Hapus karakter 'e' typo --}}
+                                @error('category_id')
+                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                                @enderror
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Supplier</label>
                                 <div class="relative">
-                                    <select name="supplier_id" x-model="editForm.supplier_id" required
-                                        class="flex h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                                    <select name="supplier_id" x-model="editForm.supplier_id"
+                                        class="flex h-10 w-full appearance-none rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('supplier_id') border-red-500 @enderror">
                                         <option value="" disabled>Select...</option>
                                         @foreach ($suppliers ?? [] as $sup)
-                                            <option value="{{ $sup->id }}">{{ $sup->supplier_name }}</option>
+                                            <option value="{{ $sup->supplier_id }}">{{ $sup->supplier_name }}</option>
                                         @endforeach
                                     </select>
                                     <x-dynamic-component component="lucide-chevron-down"
                                         class="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
                                 </div>
+                                @error('supplier_id')
+                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
-                        {{-- Quantity, Unit, Expiry --}}
-                        <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Quantity</label>
-                                <input type="number" name="stock" x-model="editForm.stock" required
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">Unit</label>
-                                <select name="unit" x-model="editForm.unit" required
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
-                                    <option>Strip</option>
-                                    <option>Bottle</option>
-                                    <option>Box</option>
-                                    <option>Pcs</option>
-                                </select>
+                                <input type="number" name="stock" x-model="editForm.stock"
+                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('stock') border-red-500 @enderror">
+                                @error('stock')
+                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                                @enderror
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Expiry</label>
-                                <input type="date" name="expired_date" x-model="editForm.expired_date" required
-                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                                <input type="date" name="expired_date" x-model="editForm.expired_date"
+                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('expired_date') border-red-500 @enderror">
+                                @error('expired_date')
+                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
                         {{-- Footer --}}
                         <div class="pt-4 border-t border-border flex items-center justify-end gap-3">
                             <button type="button" @click="showEditModal = false"
-                                class="h-10 px-4 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground text-sm font-medium transition-colors">
+                                class="h-10 px-4 rounded-md border bg-background hover:bg-accent hover:text-accent-foreground text-sm font-medium transition-colors">
                                 Cancel
                             </button>
                             <button type="submit"

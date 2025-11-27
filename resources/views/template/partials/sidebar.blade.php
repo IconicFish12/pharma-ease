@@ -18,7 +18,7 @@
 
         {{-- Helper function untuk class active --}}
         @php
-            $activeClass = 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm';
+            $activeClass = 'bg-green-600 text-sidebar-primary-foreground shadow-sm';
             $inactiveClass =
                 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground/80 transition-colors';
         @endphp

@@ -1,9 +1,5 @@
 @extends('template.dashboard')
 @section('admin-dashboard')
-    {{--
-        x-data setup:
-        - Mirip dengan Inventory, tapi data editForm lebih sedikit (hanya name & description)
-    --}}
     <div x-data="{
         showAddModal: {{ $errors->any() && !old('id') ? 'true' : 'false' }},
         showEditModal: {{ $errors->any() && old('id') ? 'true' : 'false' }},
@@ -77,6 +73,14 @@
                         <x-dynamic-component component="lucide-plus" class="h-4 w-4" />
                         Add Category
                     </button>
+
+                    <a href="{{ route('admin.medicine') }}">
+                        <button
+                            class="h-9 px-2 inline-flex items-center justify-center gap-1 rounded-md  bg-green-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors shadow-sm">
+                            <x-dynamic-component component="lucide-move-left" class="h-4 w-4" />
+                            Back to Medicine
+                        </button>
+                    </a>
                 </div>
             </div>
 
@@ -141,9 +145,9 @@
             </div>
 
             {{-- PAGINATION --}}
-            {{-- <div class="p-4 border-t border-border">
-                {{ $categories->links() }}
-            </div> --}}
+            <div class="p-4 border-t border-border">
+                {{ $dataArr->links() }}
+            </div>
         </div>
 
 
