@@ -4,6 +4,7 @@ export default {
         "./resources/views/**/**/*.blade.php",
         "./resources/views/**/*.blade.php",
         "./storage/framework/views/*.php",
+        './resources/views/vendor/pagination/*.blade.php'
         // "./resources/**/*.js",
         // "./resources/**/*.vue",
     ],

@@ -21,18 +21,14 @@ class Medicine extends Model
 
     public $incrementing = false;
 
-    public function medicineCategory() {
-        return $this->belongsTo(
-            MedicineCategory::class,
-            'category_id',
-        );
+    public function category()
+    {
+        return $this->belongsTo(MedicineCategory::class, 'category_id', 'category_id');
     }
 
-    public function supplier() {
-        return $this->belongsToMany(
-            Supplier::class,
-            'supplier_id',
-        );
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id', 'supplier_id');
     }
 
     public function orders()

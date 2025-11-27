@@ -7,6 +7,7 @@ use App\Http\Requests\StoreMedicineRequest;
 use App\Http\Requests\UpdateMedicineRequest;
 use App\Models\MedicineCategory;
 use App\Models\Supplier;
+use Illuminate\Http\Request;
 
 class MedicineController extends Controller
 {
@@ -20,9 +21,9 @@ class MedicineController extends Controller
             'title' => 'Medicine Storage',
             'mainHeader' => 'Medicine Storage',
             'subHeader' => 'Tempat Penyimpanan Obat Apotek Lamtama',
-            'dataArr' => Medicine::with(['medicineCategory', 'supplier'])->get(),
-            'category'=> MedicineCategory::all(),
-            'supplier'=> Supplier::all()
+            'dataArr' => Medicine::with(['category', 'supplier'])->paginate(request()->has('paginate') ?? 15),
+            'categories'=> MedicineCategory::all(),
+            'suppliers'=> Supplier::all()
         ]);
     }
 
@@ -39,7 +40,16 @@ class MedicineController extends Controller
      */
     public function store(StoreMedicineRequest $request)
     {
-        dd($request->all());
+        try {
+            Medicine::create($request->validated());
+
+            $request->session()->flash('success', 'Medicine added successfully!');
+            return back();
+        } catch (\Exception $e) {
+            $request->session()->flash('error', 'Failed to add medicine: ' . $e->getMessage());
+
+            return back()->withInput();
+        }
     }
 
     /**
@@ -63,7 +73,15 @@ class MedicineController extends Controller
      */
     public function update(UpdateMedicineRequest $request, Medicine $medicine)
     {
-        //
+        try {
+            $medicine = Medicine::findOrFail($medicine->medicine_id);
+            $medicine->update($request->validated());
+
+            return back()->with('success', 'Medicine updated successfully!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to update medicine: ' . $e->getMessage())
+                         ->withInput();
+        }
     }
 
     /**
@@ -71,6 +89,13 @@ class MedicineController extends Controller
      */
     public function destroy(Medicine $medicine)
     {
-        //
+        try {
+            $medicine = Medicine::findOrFail($medicine->medicine_id);
+            $medicine->delete();
+
+            return back()->with('success', 'Medicine deleted successfully!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to delete medicine: ' . $e->getMessage());
+        }
     }
 }

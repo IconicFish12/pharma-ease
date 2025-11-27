@@ -17,7 +17,7 @@ class MedicineCategoryController extends Controller
             'title' => 'Medicine Category',
             'mainHeader' => 'Medicine Category',
             'subHeader' => 'Kategori Obat yang tersedia di Apotek Lamtama',
-            'dataArr' => MedicineCategory::all(),
+            'dataArr' => MedicineCategory::paginate(request()->has('paginate') ?? 15),
         ]);
     }
 

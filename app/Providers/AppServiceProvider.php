@@ -92,7 +92,7 @@ class AppServiceProvider extends ServiceProvider
             return "<?php echo 'Rp.' . number_format($amount, 2); ?>";
         });
 
-        Paginator::useBootstrapFive();
+        Paginator::useTailwind();
 
         config(['app.locale' => 'id']);
         Carbon::setLocale('id');
