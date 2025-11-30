@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Supplier;
 use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
+use App\Http\Resources\SupplierResource;
 
 class SupplierController extends Controller
 {
@@ -13,14 +14,19 @@ class SupplierController extends Controller
      */
     public function index()
     {
-        $data = Supplier::paginate(request()->has('paginate') ?? 15)
-                        ->toResourceCollection();;
+        $data = Supplier::latest()->paginate(request()->has('paginate', 15));
 
         if (request()->wantsJson()) {
             return response()->json([
                 'status' => 'success',
                 'message' => 'Suppplier Data is get Successfully',
-                $data,
+                'data' => SupplierResource::collection($data),
+                'meta' => [
+                    'current_page' => $data->currentPage(),
+                    'last_page' => $data->lastPage(),
+                    'per_page' => $data->perPage(),
+                    'total' => $data->total(),
+                ]
             ]);
         }
 

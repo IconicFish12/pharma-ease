@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Medicine;
 use App\Http\Requests\StoreMedicineRequest;
 use App\Http\Requests\UpdateMedicineRequest;
+use App\Http\Resources\MedicineResource;
 use App\Models\MedicineCategory;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
@@ -16,15 +17,20 @@ class MedicineController extends Controller
      */
     public function index()
     {
-        $data = Medicine::with(['category', 'supplier'])
-                ->paginate(request()->has('paginate') ?? 15)
-                ->toResourceCollection();
+        $data = Medicine::latest()->with(['category', 'supplier'])
+                ->paginate(request()->input('paginate', 15));
 
         if (request()->wantsJson()) {
             return response()->json([
                 'status' => 'success',
                 'message' => 'Medicine Data is get Successfully',
-                $data,
+                'data' => MedicineResource::collection($data),
+                'meta' => [
+                    'current_page' => $data->currentPage(),
+                    'last_page' => $data->lastPage(),
+                    'per_page' => $data->perPage(),
+                    'total' => $data->total(),
+                ]
             ]);
         }
 

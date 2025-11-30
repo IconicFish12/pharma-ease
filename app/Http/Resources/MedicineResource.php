@@ -4,9 +4,9 @@ namespace App\Http\Resources;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-class MedicineResource extends ResourceCollection
+class MedicineResource extends JsonResource
 {
     /**
      * Transform the resource collection into an array.
@@ -20,10 +20,10 @@ class MedicineResource extends ResourceCollection
             'medicineName' => $this->medicine_name,
             'sku' => $this->sku,
             'stock' => $this->stock,
-            'expiredDate' => date('d M Y', strtotime($this->expired_date)),
+            'expiredDate' => date('d M Y', strtotime($this->expired_date)) ?? null,
             'price' => 'Rp ' . number_format($this->price, 0, ',', '.'),
-            'category' => MedicineCategoryResource::collection($this->whenLoaded('category')),
-            'suplier' => SupplierResource::collection($this->whenLoaded('supplier')),
+            'category' => new MedicineCategoryResource($this->whenLoaded('category')),
+            'suplier' => new SupplierResource($this->whenLoaded('supplier')),
             'createdAt' => Carbon::parse($this->created_at)->diffForHumans(),
             'updatedAt' => Carbon::parse($this->updated_at)->diffForHumans()
         ];
