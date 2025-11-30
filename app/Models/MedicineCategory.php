@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Http\Resources\MedicineCategoryResource;
+use Illuminate\Database\Eloquent\Attributes\UseResourceCollection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[UseResourceCollection(MedicineCategoryResource::class)]
 class MedicineCategory extends Model
 {
     /** @use HasFactory<\Database\Factories\MedicineCategoryFactory> */

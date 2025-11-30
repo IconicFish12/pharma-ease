@@ -6,7 +6,6 @@ use App\Models\MedicineCategory;
 use App\Http\Requests\StoreMedicineCategoryRequest;
 use App\Http\Requests\UpdateMedicineCategoryRequest;
 use App\Http\Resources\MedicineCategoryResource;
-
 class MedicineCategoryController extends Controller
 {
     /**
@@ -14,13 +13,19 @@ class MedicineCategoryController extends Controller
      */
     public function index()
     {
-        $data = MedicineCategory::paginate(request()->has('paginate') ?? 15);
+         $data = MedicineCategory::latest()->paginate(request()->input('paginate', 15));
 
         if (request()->wantsJson()) {
             return response()->json([
                 'status' => 'success',
-                'message' => 'Medicine Category Data is get Successfully',
-                MedicineCategoryResource::collection($data),
+                'message' => 'Medicine Category Data fetched Successfully',
+                'data' => MedicineCategoryResource::collection($data),
+                'meta' => [
+                    'current_page' => $data->currentPage(),
+                    'last_page' => $data->lastPage(),
+                    'per_page' => $data->perPage(),
+                    'total' => $data->total(),
+                ]
             ]);
         }
 
@@ -45,7 +50,34 @@ class MedicineCategoryController extends Controller
      */
     public function store(StoreMedicineCategoryRequest $request)
     {
-        //
+        try {
+            $data = MedicineCategory::create($request->validated());
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Medicine Category Data is added Successfully',
+                    'data' => $data
+                ]);
+            }
+
+            $request->session()->flash('success', 'Data Berhasil dibuat');
+
+            return back();
+        } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Failed to add Medicine Category Data',
+                    'errors' => $e->getMessage()
+                ]);
+            }
+
+            $request->session()->flash('error', 'Failed to add medicine category: ' . $e->getMessage());
+
+            return back()->withInput();
+        }
+
     }
 
     /**
@@ -69,7 +101,38 @@ class MedicineCategoryController extends Controller
      */
     public function update(UpdateMedicineCategoryRequest $request, MedicineCategory $medicineCategory)
     {
-        //
+        try {
+            if ($request->name == $medicineCategory->name && $request->description == $medicineCategory->description) {
+                $request->session()->flash('success', 'tidak ada data yang diubah');
+
+                return back();
+            }
+            $data = $medicineCategory->find($medicineCategory->category_id)->update($request->validated());
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Medicine Category Data is updated Successfully',
+                    'data' => $data
+                ]);
+            }
+
+            $request->session()->flash('success', 'Data Berhasil diubah');
+
+            return back();
+        } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Failed to update Medicine Category Data',
+                    'errors' => $e->getMessage()
+                ]);
+            }
+
+            $request->session()->flash('error', 'Failed to update medicine category: ' . $e->getMessage());
+
+            return back()->withInput();
+        }
     }
 
     /**
@@ -77,6 +140,30 @@ class MedicineCategoryController extends Controller
      */
     public function destroy(MedicineCategory $medicineCategory)
     {
-        //
+        try {
+            $data = $medicineCategory->destroy($medicineCategory->category_id);
+
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Medicine Category Data is deleted Successfully',
+                    'data' => $data
+                ]);
+            }
+
+            request()->session()->flash('success', "Data Berhasil dihapus");
+
+            return back();
+        } catch (\Exception $e) {
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Failed to delete Medicine Category Data',
+                    'errors' => $e->getMessage()
+                ]);
+            }
+
+            return back()->with('error', 'Failed to delete medicine category: ' . $e->getMessage());
+        }
     }
 }

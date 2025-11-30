@@ -24,6 +24,7 @@ class MedicineOrder extends Model
         return $this->belongsTo(
             User::class,
             'user_id',
+            'user_id'
         );
     }
 
@@ -31,6 +32,7 @@ class MedicineOrder extends Model
         return $this->belongsToMany(
             Supplier::class,
             'supplier_id',
+            'supplier_id'
         );
     }// Import model pivot tadi
 

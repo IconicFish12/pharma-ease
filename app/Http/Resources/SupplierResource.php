@@ -4,9 +4,9 @@ namespace App\Http\Resources;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class MedicineCategoryResource extends JsonResource
+class SupplierResource extends ResourceCollection
 {
     /**
      * Transform the resource collection into an array.
@@ -16,8 +16,11 @@ class MedicineCategoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->category_id,
-            'categoryName' => $this->name,
+            'id' => $this->supplier_id,
+            'supplierName' => $this->supplier_name,
+            'contactPerson' => $this->contact_person,
+            'phone' => $this->phone,
+            'address' => $this->address,
             'createdAt' => Carbon::parse($this->created_at)->diffForHumans(),
             'updatedAt' => Carbon::parse($this->updated_at)->diffForHumans()
         ];

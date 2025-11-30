@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Http\Resources\MedicineResource;
+use Illuminate\Database\Eloquent\Attributes\UseResourceCollection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+#[UseResourceCollection(MedicineResource::class)]
 class Medicine extends Model
 {
     /** @use HasFactory<\Database\Factories\MedicineFactory> */
@@ -21,18 +24,14 @@ class Medicine extends Model
 
     public $incrementing = false;
 
-    public function medicineCategory() {
-        return $this->belongsTo(
-            MedicineCategory::class,
-            'category_id',
-        );
+    public function category()
+    {
+        return $this->belongsTo(MedicineCategory::class, 'category_id', 'category_id');
     }
 
-    public function supplier() {
-        return $this->belongsToMany(
-            Supplier::class,
-            'supplier_id',
-        );
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id', 'supplier_id');
     }
 
     public function orders()

@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use Carbon\Carbon;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 
@@ -84,5 +87,15 @@ class AppServiceProvider extends ServiceProvider
         ];
 
         View::share('menuItems', $menuItems);
+
+        Blade::directive('money', function ($amount) {
+            return "<?php echo 'Rp.' . number_format($amount, 2); ?>";
+        });
+
+        Paginator::useTailwind();
+
+        config(['app.locale' => 'id']);
+        Carbon::setLocale('id');
+        date_default_timezone_set('Asia/Jakarta');
     }
 }
