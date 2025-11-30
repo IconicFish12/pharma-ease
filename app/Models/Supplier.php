@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Http\Resources\SupplierResource;
+use Illuminate\Database\Eloquent\Attributes\UseResourceCollection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[UseResourceCollection(SupplierResource::class)]
 class Supplier extends Model
 {
     /** @use HasFactory<\Database\Factories\SupplierFactory> */

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Http\Resources\SalesTransactionResource;
+use Illuminate\Database\Eloquent\Attributes\UseResourceCollection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+#[UseResourceCollection(SalesTransactionResource::class)]
 class SalesTransaction extends Model
 {
     /** @use HasFactory<\Database\Factories\SalesTransactionFactory> */
@@ -25,6 +28,7 @@ class SalesTransaction extends Model
         return $this->belongsTo(
             User::class,
             'user_id',
+            'user_id'
         );
     }
 
