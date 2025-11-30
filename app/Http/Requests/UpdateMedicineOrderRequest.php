@@ -22,7 +22,13 @@ class UpdateMedicineOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'supplier_id' => 'required|exists:suppliers,supplier_id',
+            'order_date' => 'required|date',
+            'status' => 'required|in:Pending,Completed,Cancelled',
+            'medicines' => 'required|array|min:1',
+            'medicines.*.medicine_id' => 'required|exists:medicines,medicine_id',
+            'medicines.*.quantity' => 'required|integer|min:1',
+            'medicines.*.unit_price' => 'required|numeric|min:0',
         ];
     }
 }

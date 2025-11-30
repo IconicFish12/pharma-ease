@@ -16,12 +16,23 @@ class MedicineController extends Controller
      */
     public function index()
     {
-        // dd(Medicine::with(['medicineCategory', 'supplier'])->get()->count());
+        $data = Medicine::with(['category', 'supplier'])
+                ->paginate(request()->has('paginate') ?? 15)
+                ->toResourceCollection();
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Medicine Data is get Successfully',
+                $data,
+            ]);
+        }
+
         return view('admin.medicine.medicine_inventory', [
             'title' => 'Medicine Storage',
             'mainHeader' => 'Medicine Storage',
             'subHeader' => 'Tempat Penyimpanan Obat Apotek Lamtama',
-            'dataArr' => Medicine::with(['category', 'supplier'])->paginate(request()->has('paginate') ?? 15),
+            'dataArr' => $data,
             'categories'=> MedicineCategory::all(),
             'suppliers'=> Supplier::all()
         ]);
@@ -41,11 +52,28 @@ class MedicineController extends Controller
     public function store(StoreMedicineRequest $request)
     {
         try {
-            Medicine::create($request->validated());
+            $data = Medicine::create($request->validated());
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Medicine Data is added Successfully',
+                    'data' => $data
+                ]);
+            }
 
             $request->session()->flash('success', 'Medicine added successfully!');
+
             return back();
         } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Failed to add Medicine Data',
+                    'errors' => $e->getMessage()
+                ]);
+            }
+
             $request->session()->flash('error', 'Failed to add medicine: ' . $e->getMessage());
 
             return back()->withInput();
@@ -75,10 +103,26 @@ class MedicineController extends Controller
     {
         try {
             $medicine = Medicine::findOrFail($medicine->medicine_id);
-            $medicine->update($request->validated());
+            $data = $medicine->update($request->validated());
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Medicine Data is updated Successfully',
+                    'data' => $data
+                ]);
+            }
 
             return back()->with('success', 'Medicine updated successfully!');
         } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Failed to update Medicine Data',
+                    'errors' => $e->getMessage()
+                ]);
+            }
+
             return back()->with('error', 'Failed to update medicine: ' . $e->getMessage())
                          ->withInput();
         }
@@ -91,10 +135,28 @@ class MedicineController extends Controller
     {
         try {
             $medicine = Medicine::findOrFail($medicine->medicine_id);
-            $medicine->delete();
+            $data = $medicine->delete();
 
-            return back()->with('success', 'Medicine deleted successfully!');
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Medicine Data is deleted Successfully',
+                    'data' => $data
+                ]);
+            }
+
+            request()->session()->flash('success', 'Medicine deleted successfully!');
+
+            return back();
         } catch (\Exception $e) {
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Failed to delete Medicine Data',
+                    'errors' => $e->getMessage()
+                ]);
+            }
+
             return back()->with('error', 'Failed to delete medicine: ' . $e->getMessage());
         }
     }

@@ -35,7 +35,6 @@
         }
     }">
 
-        {{-- FLASH MESSAGE SESSION (AUTO HIDE) --}}
         @if (session('success'))
             <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
                 x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
@@ -64,12 +63,10 @@
 
         <div class="bg-card rounded-xl border border-border shadow-sm">
 
-            {{-- TOOLBAR SECTION --}}
             <div class="p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h3 class="font-semibold text-lg text-foreground">Inventory Management</h3>
 
                 <div class="flex items-center gap-3">
-                    {{-- Search Form --}}
                     <form action="{{ route('admin.medicine') }}" method="GET" class="relative w-full sm:w-64">
                         <x-dynamic-component component="lucide-search"
                             class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -89,7 +86,6 @@
                         Add New Medicine
                     </button>
 
-                    {{-- Link ke Halaman Kategori (Opsional) --}}
                     @if (Route::has('admin.medicine-category'))
                         <a href="{{ route('admin.medicine-category') }}">
                             <button
@@ -101,8 +97,6 @@
                     @endif
                 </div>
             </div>
-
-            {{-- TABLE SECTION --}}
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
                     <thead class="bg-muted/50 text-muted-foreground font-medium border-b border-border">
@@ -123,14 +117,14 @@
                         @forelse ($dataArr as $key => $item)
                             <tr class="hover:bg-muted/20 transition-colors">
                                 <td class="px-6 py-4 font-medium text-foreground">
-                                    {{ $dataArr->firstItem() + $key }}
+                                    {{ $loop->iteration }}
                                 </td>
                                 <td class="px-6 py-4 font-medium text-foreground">{{ $item->medicine_name }}</td>
                                 <td class="px-6 py-4 text-muted-foreground">{{ $item->sku }}</td>
                                 <td class="px-6 py-4 text-foreground">{{ optional($item->category)->name ?? '-' }}</td>
                                 <td class="px-6 py-4 text-muted-foreground">
                                     {{ optional($item->supplier)->supplier_name ?? '-' }}</td>
-                                <td class="px-6 py-4 text-foreground">{{ $item->stock }} {{ $item->unit }}</td>
+                                <td class="px-6 py-4 text-foreground">{{ $item->stock }}</td>
                                 <td class="px-6 py-4">
                                     @php
                                         $stockStatus = '';
@@ -151,22 +145,15 @@
                                         {{ $stockStatus }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-foreground">
-                                    {{ $item->expired_date ? date('d M Y', strtotime($item->expired_date)) : '-' }}
-                                </td>
-                                <td class="px-6 py-4 text-foreground">
-                                    @money($item->price)
-                                </td>
+                                <td class="px-6 py-4 text-foreground"> {{ date('d M Y', strtotime($item->expired_date)) }} </td>
+                                <td class="px-6 py-4 text-foreground">@money($item->price)</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        {{-- Tombol Edit --}}
                                         <button @click="openEditModal({{ json_encode($item) }})"
-                                            class="p-2 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
+                                            class="p-2 rounded-md text-orange-600 hover:bg-blue-50 transition-colors"
                                             title="Edit">
                                             <x-dynamic-component component="lucide-pencil" class="h-4 w-4" />
                                         </button>
-
-                                        {{-- Tombol Delete (Perbaikan: Ditambahkan) --}}
                                         <form action="{{ asset("/admin/medicine/$item->medicine_id") }}" method="POST"
                                             onsubmit="return confirm('Are you sure you want to delete this medicine?');">
                                             @csrf
@@ -193,28 +180,18 @@
                     </tbody>
                 </table>
             </div>
-
-            {{-- PAGINATION SECTION --}}
             <div class="p-4 border-t border-border">
                 {{ $dataArr->links() }}
             </div>
         </div>
 
-
-        {{-- ========================================== --}}
-        {{-- MODAL ADD MEDICINE --}}
-        {{-- ========================================== --}}
         <div x-show="showAddModal" style="display: none;"
             class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-
-            {{-- Backdrop --}}
             <div x-show="showAddModal" x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                 x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0" @click="showAddModal = false"
                 class="fixed inset-0 bg-black/40 backdrop-blur-sm"></div>
-
-            {{-- Modal Content --}}
             <div x-show="showAddModal" x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 scale-95 translate-y-4"
                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -232,14 +209,9 @@
                         <x-dynamic-component component="lucide-x" class="h-5 w-5" />
                     </button>
                 </div>
-
-                {{-- FORM ADD --}}
                 <div class="p-6 overflow-y-auto space-y-4 custom-scrollbar">
-                    {{-- Pastikan route name sesuai di web.php --}}
                     <form action="{{ route('admin.medicine') }}" method="post">
                         @csrf
-
-                        {{-- Name --}}
                         <div class="space-y-1.5 mb-4">
                             <label class="text-sm font-medium text-foreground">Medicine Name</label>
                             <input type="text" name="medicine_name" placeholder="e.g., Paracetamol 500mg"
@@ -249,8 +221,6 @@
                                 <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
                             @enderror
                         </div>
-
-                        {{-- SKU & Price --}}
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">SKU / Code</label>
@@ -271,8 +241,6 @@
                                 @enderror
                             </div>
                         </div>
-
-                        {{-- Description --}}
                         <div class="space-y-1.5 mb-4">
                             <label class="text-sm font-medium text-foreground">Description</label>
                             <textarea name="description" rows="2" placeholder="Optional description..."
@@ -281,8 +249,6 @@
                                 <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
                             @enderror
                         </div>
-
-                        {{-- Category & Supplier --}}
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Category</label>
@@ -323,8 +289,6 @@
                                 @enderror
                             </div>
                         </div>
-
-                        {{-- Quantity, Unit, Expiry --}}
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Quantity</label>
@@ -344,8 +308,6 @@
                                 @enderror
                             </div>
                         </div>
-
-                        {{-- Footer Buttons --}}
                         <div class="pt-4 border-t border-border flex items-center justify-end gap-3">
                             <button type="button" @click="showAddModal = false"
                                 class="h-10 px-4 rounded-md border bg-background hover:bg-accent hover:text-accent-foreground text-sm font-medium transition-colors">
@@ -361,22 +323,15 @@
             </div>
         </div>
 
-
-        {{-- ========================================== --}}
-        {{-- MODAL EDIT MEDICINE --}}
-        {{-- ========================================== --}}
         <div x-show="showEditModal" style="display: none;"
             class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-
             <div x-show="showEditModal" x-transition:enter="transition ease-out duration-300"
                 x-transition:leave="transition ease-in duration-200" x-transition:leave-end="opacity-0"
                 @click="showEditModal = false" class="fixed inset-0 bg-black/40 backdrop-blur-sm"></div>
-
             <div x-show="showEditModal" x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 scale-95 translate-y-4"
                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
                 class="relative w-full max-w-lg bg-card rounded-xl shadow-lg border border-border flex flex-col max-h-[90vh] overflow-hidden">
-
                 <div class="px-6 py-4 border-b border-border flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-semibold text-foreground">Edit Medicine</h3>
@@ -388,15 +343,10 @@
                 </div>
 
                 <div class="p-6 overflow-y-auto space-y-4 custom-scrollbar">
-                    {{-- Form Edit Dynamic Action --}}
                     <form :action="'{{ route('admin.medicine') }}/' + editForm.id" method="post">
                         @csrf
                         @method('PUT')
-
-                        {{-- Hidden ID untuk validasi unique ignore --}}
                         <input type="hidden" name="medicine_id" x-model="editForm.id">
-
-                        {{-- Name --}}
                         <div class="space-y-1.5 mb-4">
                             <label class="text-sm font-medium text-foreground">Medicine Name</label>
                             <input type="text" name="medicine_name" x-model="editForm.medicine_name"
@@ -405,8 +355,6 @@
                                 <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
                             @enderror
                         </div>
-
-                        {{-- SKU & Price --}}
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">SKU / Code</label>
@@ -425,8 +373,6 @@
                                 @enderror
                             </div>
                         </div>
-
-                        {{-- Description --}}
                         <div class="space-y-1.5 mb-4">
                             <label class="text-sm font-medium text-foreground">Description</label>
                             <textarea name="description" rows="2" x-model="editForm.description"
@@ -435,8 +381,6 @@
                                 <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
                             @enderror
                         </div>
-
-                        {{-- Category & Supplier --}}
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Category</label>
@@ -451,7 +395,6 @@
                                     <x-dynamic-component component="lucide-chevron-down"
                                         class="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
                                 </div>
-                                {{-- Perbaikan: Hapus karakter 'e' typo --}}
                                 @error('category_id')
                                     <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
                                 @enderror
@@ -493,8 +436,6 @@
                                 @enderror
                             </div>
                         </div>
-
-                        {{-- Footer --}}
                         <div class="pt-4 border-t border-border flex items-center justify-end gap-3">
                             <button type="button" @click="showEditModal = false"
                                 class="h-10 px-4 rounded-md border bg-background hover:bg-accent hover:text-accent-foreground text-sm font-medium transition-colors">
