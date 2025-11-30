@@ -1,8 +1,80 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\MedicineCategoryController;
+use App\Http\Controllers\MedicineController;
+use App\Http\Controllers\MedicineOrderController;
+use App\Http\Controllers\SalesTransactionController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+Route::prefix('/admin')->name('admin.')->group(function () {
+
+    Route::prefix('/medicine')->name('medicine')->group(function(){
+        Route::get('/', [MedicineController::class, 'index']);
+        Route::post('/', [MedicineController::class, 'store']);
+        Route::post('/show', [MedicineController::class, 'show']);
+        Route::put('/{medicine:medicine_id}', [MedicineController::class, 'update']);
+        Route::delete('/{medicine:medicine_id}', [MedicineController::class, 'destroy']);
+    });
+
+
+    Route::prefix('/medicine-category')->name('medicine-category')->group(function(){
+        Route::get('/', [MedicineCategoryController::class, 'index']);
+        Route::post('/', [MedicineCategoryController::class, 'store']);
+        Route::post('/show', [MedicineCategoryController::class, 'show']);
+        Route::put('/{medicineCategory:category_id}', [MedicineCategoryController::class, 'update']);
+        Route::delete('/{medicineCategory:category_id}', [MedicineCategoryController::class, 'destroy']);
+    });
+
+    Route::prefix('/medicine-order')->name('medicine-order')->group(function(){
+        Route::get('/', [MedicineOrderController::class, 'index']);
+        Route::post('/', [MedicineOrderController::class, 'store']);
+        Route::post('/show', [MedicineOrderController::class, 'show']);
+        Route::put('/{medicineOrder:order_id}', [MedicineOrderController::class, 'update']);
+        Route::delete('/{medicineOrder:order_id}', [MedicineOrderController::class, 'destroy']);
+    });
+
+    // Route::prefix('/activity-log')->name('activity-log')->group(function(){
+    //     Route::get('/', [ActivityLogController::class, 'index']);
+    //     Route::post('/', [ActivityLogController::class, 'store']);
+    //     Route::post('/show', [ActivityLogController::class, 'show']);
+    //     Route::put('/{activityLog:id}', [ActivityLogController::class, 'update']);
+    //     Route::delete('/{activityLog:id}', [ActivityLogController::class, 'destroy']);
+    // });
+
+    Route::prefix('/suppliers')->name('suppliers-data')->group(function(){
+        Route::get('/', [SupplierController::class, 'index']);
+        Route::post('/', [SupplierController::class, 'store']);
+        Route::post('/show', [SupplierController::class, 'show']);
+        Route::put('/{supplier:supplier_id}', [SupplierController::class, 'update']);
+        Route::delete('/{supplier:supplier_id}', [SupplierController::class, 'destroy']);
+    });
+
+    Route::prefix('/users')->name('users-data')->group(function(){
+        Route::get('/', [UserController::class, 'index']);
+        Route::post('/', [UserController::class, 'store']);
+        Route::post('/show', [UserController::class, 'show']);
+        Route::put('/{user:user_id}', [UserController::class, 'update']);
+        Route::delete('/{user:user-id}', [UserController::class, 'destroy']);
+    });
+
+    // Route::prefix('/reports')->name('pharmacy-report')->group(function(){
+    //     Route::get('/', [ReportController::class, 'index']);
+    // });
+
+    // Route::prefix('/cashier-menu')->name('cashier-menu')->group(function(){
+    //     Route::get('/', [SalesTransactionController::class, 'index']);
+    //     Route::post('/', [SalesTransactionController::class, 'store']);
+    //     Route::post('/show', [SalesTransactionController::class, 'show']);
+    //     Route::put('/{medicine:id}', [SalesTransactionController::class, 'update']);
+    //     Route::delete('/{medicine:id}', [SalesTransactionController::class, 'destroy']);
+    // });
+
+});

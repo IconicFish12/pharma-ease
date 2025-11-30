@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MedicineCategory;
 use App\Http\Requests\StoreMedicineCategoryRequest;
 use App\Http\Requests\UpdateMedicineCategoryRequest;
+use App\Http\Resources\MedicineCategoryResource;
 
 class MedicineCategoryController extends Controller
 {
@@ -13,7 +14,22 @@ class MedicineCategoryController extends Controller
      */
     public function index()
     {
-        return view('admin.medicine.medicine_category');
+        $data = MedicineCategory::paginate(request()->has('paginate') ?? 15);
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Medicine Category Data is get Successfully',
+                MedicineCategoryResource::collection($data),
+            ]);
+        }
+
+        return view('admin.medicine.medicine_category', [
+            'title' => 'Medicine Category',
+            'mainHeader' => 'Medicine Category',
+            'subHeader' => 'Kategori Obat yang tersedia di Apotek Lamtama',
+            'dataArr' => $data,
+        ]);
     }
 
     /**
