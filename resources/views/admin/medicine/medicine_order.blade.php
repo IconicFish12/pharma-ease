@@ -1,136 +1,169 @@
 @extends('template.dashboard')
 @section('admin-dashboard')
-    <div x-data="{
+   <div x-data="{
         showAddModal: {{ $errors->any() && !old('id') ? 'true' : 'false' }},
         showEditModal: {{ $errors->any() && old('id') ? 'true' : 'false' }},
         search: '{{ request('search') }}',
+
+        // Data Form
         editForm: {
-            id: '{{ old('order_id') }}',
-            order_code: '{{ old('order_code') }}',
-            user_id: '{{ old('user_id') }}',
+            id: '{{ old('id') }}',
             supplier_id: '{{ old('supplier_id') }}',
-            order_date: '{{ old('order_date') }}',
-            total_price: '{{ old('total_price') }}',
-            status: '{{ old('status') }}',
+            user_id: '{{ old('user_id') }}',
+            order_date: '{{ old('order_date', date('Y-m-d')) }}',
+            status: '{{ old('status', 'pending') }}',
+            // Load old medicines jika ada error validasi, jika tidak kosongkan
+            medicines: {{ old('medicines') ? json_encode(old('medicines')) : '[]' }}
         },
+
+        // Master Data Obat (untuk dropdown & harga)
+        medicineList: {{ json_encode($medicines_list) }},
+
+        // Logic: Tambah Baris
+        addMedicineRow() {
+            this.editForm.medicines.push({
+                medicine_id: '',
+                quantity: 1,
+                unit_price: 0,
+                subtotal: 0
+            });
+        },
+
+        // Logic: Hapus Baris
+        removeMedicineRow(index) {
+            this.editForm.medicines.splice(index, 1);
+        },
+
+        // Logic: Update Harga/Subtotal saat obat dipilih
+        updateRow(index) {
+            let row = this.editForm.medicines[index];
+            let selectedMed = this.medicineList.find(m => m.medicine_id == row.medicine_id);
+
+            if (selectedMed && row.unit_price == 0) {
+                row.unit_price = parseFloat(selectedMed.price);
+            }
+            row.subtotal = (parseInt(row.quantity) || 0) * (parseFloat(row.unit_price) || 0);
+        },
+
+        // Logic: Grand Total
+        get grandTotal() {
+            return this.editForm.medicines.reduce((sum, row) => sum + ((parseInt(row.quantity) || 0) * (parseFloat(row.unit_price) || 0)), 0);
+        },
+
+        // Logic: Reset Form untuk Add
+        resetForm() {
+            this.editForm = {
+                id: null,
+                supplier_id: '',
+                user_id: '',
+                order_date: '{{ date('Y-m-d') }}',
+                status: 'pending',
+                medicines: []
+            };
+            this.addMedicineRow(); // Default 1 baris kosong
+            this.showAddModal = true;
+        },
+
+        // Logic: Isi Form untuk Edit
         openEditModal(item) {
+            let dateOnly = item.order_date ? item.order_date.split(' ')[0] : '';
             this.editForm = {
                 id: item.order_id,
-                order_code: item.order_code,
-                user_id: item.user_id,
                 supplier_id: item.supplier_id,
-                order_date: item.order_date,
-                total_price: item.total_price,
+                user_id: item.user_id,
+                order_date: dateOnly,
                 status: item.status,
+                medicines: item.medicines.map(med => ({
+                    medicine_id: med.medicine_id,
+                    quantity: med.pivot.quantity,
+                    unit_price: med.pivot.unit_price,
+                    subtotal: med.pivot.subtotal
+                }))
             };
             this.showEditModal = true;
         }
     }">
 
-        {{-- FLASH MESSAGE SESSION (AUTO HIDE) --}}
+        {{-- Flash Messages --}}
         @if (session('success'))
-            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
-                x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0"
-                class="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3">
-                <x-dynamic-component component="lucide-check-circle" class="h-5 w-5 shrink-0 text-emerald-600" />
-                <div>
-                    <h4 class="font-semibold text-sm">Success</h4>
-                    <p class="text-sm">{{ session('success') }}</p>
-                </div>
+            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show" class="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3">
+                <x-dynamic-component component="lucide-check-circle" class="h-5 w-5 shrink-0" />
+                <p class="text-sm font-medium">{{ session('success') }}</p>
+            </div>
+        @endif
+        @if (session('error'))
+            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show" class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 flex items-center gap-3">
+                <x-dynamic-component component="lucide-alert-circle" class="h-5 w-5 shrink-0" />
+                <p class="text-sm font-medium">{{ session('error') }}</p>
             </div>
         @endif
 
-        @if (session('error'))
-            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
-                x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0"
-                class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 flex items-center gap-3">
-                <x-dynamic-component component="lucide-alert-circle" class="h-5 w-5 shrink-0 text-red-600" />
-                <div>
-                    <h4 class="font-semibold text-sm">Error</h4>
-                    <p class="text-sm">{{ session('error') }}</p>
-                </div>
+        {{-- Global Validation Errors (Optional, useful for debugging) --}}
+        @if ($errors->any())
+            <div class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+                <ul class="list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
         <div class="bg-card rounded-xl border border-border shadow-sm">
-
-            {{-- TOOLBAR SECTION --}}
+            {{-- Toolbar --}}
             <div class="p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h3 class="font-semibold text-lg text-foreground">Inventory Management</h3>
-
+                <h3 class="font-semibold text-lg text-foreground">{{ $mainHeader }}</h3>
                 <div class="flex items-center gap-3">
-                    {{-- Search Form --}}
-                    <form action="{{ route('admin.medicine') }}" method="GET" class="relative w-full sm:w-64">
-                        <x-dynamic-component component="lucide-search"
-                            class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <input type="text" name="search" placeholder="Search medicines..."
-                            value="{{ request('search') }}"
-                            class="w-full h-9 pl-9 pr-4 rounded-md border bg-background text-sm outline-none focus:ring-2 focus:ring-ring">
+                    <form action="" method="GET" class="relative w-full sm:w-64">
+                        <x-dynamic-component component="lucide-search" class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <input type="text" name="search" placeholder="Search orders..." value="{{ request('search') }}"
+                            class="w-full h-9 pl-9 pr-4 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-ring focus:outline-none">
                     </form>
-
-                    <button
-                        class="h-9 w-9 flex items-center justify-center rounded-md border bg-background hover:bg-muted text-foreground transition-colors">
-                        <x-dynamic-component component="lucide-filter" class="h-4 w-4" />
-                    </button>
-
-                    <button @click="showAddModal = true"
-                        class="h-9 px-4 inline-flex items-center justify-center gap-2 rounded-md bg-green-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors shadow-sm">
+                    <button @click="resetForm()" class="h-9 px-4 inline-flex items-center justify-center gap-2 rounded-md bg-green-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors shadow-sm">
                         <x-dynamic-component component="lucide-plus" class="h-4 w-4" />
-                        Add New Medicine
+                        Add Order
                     </button>
                 </div>
             </div>
 
-            {{-- TABLE SECTION --}}
+            {{-- Table --}}
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
                     <thead class="bg-muted/50 text-muted-foreground font-medium border-b border-border">
                         <tr>
-                            <th class="px-6 py-4">No</th>
-                            <th class="px-6 py-4">Medicine Order Code</th>
+                            <th class="px-6 py-4">Code</th>
                             <th class="px-6 py-4">User</th>
                             <th class="px-6 py-4">Supplier</th>
-                            <th class="px-6 py-4">Order Date</th>
-                            <th class="px-6 py-4">Total Price</th>
+                            <th class="px-6 py-4">Date</th>
+                            <th class="px-6 py-4">Total</th>
                             <th class="px-6 py-4">Status</th>
                             <th class="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-border">
-                        @forelse ($dataArr as $key => $item)
+                        @forelse ($dataArr as $item)
                             <tr class="hover:bg-muted/20 transition-colors">
-                                <td class="px-6 py-4 font-medium text-foreground">
-                                    {{ $loop->iteration }}
-                                </td>
-                                <td class="px-6 py-4 font-medium text-foreground">{{ $item->order_code }}</td>
-                                <td class="px-6 py-4 text-muted-foreground">{{ $item->user->name }}</td>
-                                <td class="px-6 py-4 text-foreground">{{ $item->supplier->supplier_name }}</td>
-                                <td class="px-6 py-4 text-foreground">{{ $item->stock }} {{ $item->unit }}</td>
-                                <td class="px-6 py-4 text-foreground">
-                                    {{ $item->order_date ? date('d M Y', strtotime($item->order_date)) : '-' }}
-                                </td>
-                                <td class="px-6 py-4 text-foreground">
-                                    @money($item->total_price)
+                                <td class="px-6 py-4 font-medium">{{ $item->order_code }}</td>
+                                <td class="px-6 py-4">{{ optional($item->user)->name ?? '-' }}</td>
+                                <td class="px-6 py-4">{{ optional($item->supplier)->supplier_name ?? '-' }}</td>
+                                <td class="px-6 py-4">{{ date('d M Y', strtotime($item->order_date)) }}</td>
+                                <td class="px-6 py-4 font-medium">@money($item->total_price)</td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium capitalize
+                                        {{ $item->status == 'completed' ? 'bg-green-100 text-green-700' :
+                                           ($item->status == 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') }}">
+                                        {{ $item->status }}
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        {{-- Tombol Edit --}}
-                                        <button @click="openEditModal({{ json_encode($item) }})"
-                                            class="p-2 rounded-md text-orange-600 hover:bg-blue-50 transition-colors"
-                                            title="Edit">
+                                        <button @click="openEditModal({{ json_encode($item) }})" class="p-2 text-orange-600 hover:bg-blue-50 rounded-md transition-colors">
                                             <x-dynamic-component component="lucide-pencil" class="h-4 w-4" />
                                         </button>
-
-                                        {{-- Tombol Delete (Perbaikan: Ditambahkan) --}}
-                                        <form action="{{ asset("/admin/medicine-order/$item->order_id") }}" method="POST"
-                                            onsubmit="return confirm('Are you sure you want to delete this medicine?');">
+                                        <form action="{{ asset("/admin/medicine-order/$item->order_id") }}" method="POST" onsubmit="return confirm('Delete order?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit"
-                                                class="p-2 rounded-md text-red-600 hover:bg-red-50 transition-colors"
-                                                title="Delete">
+                                            <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors">
                                                 <x-dynamic-component component="lucide-trash-2" class="h-4 w-4" />
                                             </button>
                                         </form>
@@ -142,7 +175,7 @@
                                 <td colspan="10" class="px-6 py-12 text-center text-muted-foreground">
                                     <div class="flex flex-col items-center justify-center gap-2">
                                         <x-dynamic-component component="lucide-shopping-cart" class="h-8 w-8 opacity-50" />
-                                        <p>No Medicine Order found in inventory.</p>
+                                        <p>No Order found in inventory.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -150,317 +183,121 @@
                     </tbody>
                 </table>
             </div>
-
-            {{-- PAGINATION SECTION --}}
-            <div class="p-4 border-t border-border">
-                {{ $dataArr->links() }}
-            </div>
+            <div class="p-4 border-t border-border">{{ $dataArr->links() }}</div>
         </div>
 
+        {{-- MODAL FORM (Reusable Add & Edit) --}}
+        <div x-show="showAddModal || showEditModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" @click="showAddModal = false; showEditModal = false"></div>
 
-        {{-- ========================================== --}}
-        {{-- MODAL ADD MEDICINE --}}
-        {{-- ========================================== --}}
-        <div x-show="showAddModal" style="display: none;"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-
-            {{-- Backdrop --}}
-            <div x-show="showAddModal" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0" @click="showAddModal = false"
-                class="fixed inset-0 bg-black/40 backdrop-blur-sm"></div>
-
-            {{-- Modal Content --}}
-            <div x-show="showAddModal" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-                class="relative w-full max-w-lg bg-card rounded-xl shadow-lg border border-border flex flex-col max-h-[90vh] overflow-hidden">
-
+            <div class="relative w-full max-w-4xl bg-card rounded-xl shadow-lg border border-border flex flex-col max-h-[90vh] overflow-hidden">
                 <div class="px-6 py-4 border-b border-border flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold text-foreground">Add New Medicine Order</h3>
-                        <p class="text-sm text-muted-foreground">Enter the medicine order details to add to inventory.</p>
-                    </div>
-                    <button @click="showAddModal = false" class="text-muted-foreground hover:text-foreground">
+                    <h3 class="text-lg font-semibold" x-text="showEditModal ? 'Edit Order' : 'New Order'"></h3>
+                    <button @click="showAddModal = false; showEditModal = false" class="text-muted-foreground hover:text-foreground">
                         <x-dynamic-component component="lucide-x" class="h-5 w-5" />
                     </button>
                 </div>
 
-                {{-- FORM ADD --}}
-                <div class="p-6 overflow-y-auto space-y-4 custom-scrollbar">
-                    {{-- Pastikan route name sesuai di web.php --}}
-                    <form action="{{ route('admin.medicine') }}" method="post">
+                <div class="p-6 overflow-y-auto custom-scrollbar">
+                    <form :action="showEditModal ? '{{ url('admin/medicine-order') }}/' + editForm.id : '{{ route('admin.medicine-order') }}'" method="POST">
                         @csrf
+                        <template x-if="showEditModal"><input type="hidden" name="_method" value="PUT"></template>
+                        <template x-if="showEditModal"><input type="hidden" name="id" x-model="editForm.id"></template>
 
-                        {{-- Name --}}
-                        <div class="space-y-1.5 mb-4">
-                            <label class="text-sm font-medium text-foreground">Medicine Name</label>
-                            <input type="text" name="medicine_name" placeholder="e.g., Paracetamol 500mg"
-                                value="{{ old('medicine_name') }}"
-                                class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('medicine_name') border-red-500 @enderror">
-                            @error('medicine_name')
-                                <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- SKU & Price --}}
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">SKU / Code</label>
-                                <input type="text" name="sku" placeholder="e.g., MED001"
-                                    value="{{ old('sku') }}"
-                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('sku') border-red-500 @enderror">
-                                @error('sku')
-                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                                @enderror
+                        {{-- Main Info --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium">User (Cashier)</label>
+                                <select name="user_id" x-model="editForm.user_id" class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none" >
+                                    <option value="" disabled>Select User</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->user_id }}">{{ $user->name }} ({{ $user->role }})</option>
+                                    @endforeach
+                                </select>
+                                @error('user_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                             </div>
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">Price (Rp)</label>
-                                <input type="number" name="price" placeholder="e.g., 50000"
-                                    value="{{ old('price') }}"
-                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('price') border-red-500 @enderror">
-                                @error('price')
-                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                                @enderror
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium">Supplier</label>
+                                <select name="supplier_id" x-model="editForm.supplier_id" class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none" >
+                                    <option value="" disabled>Select Supplier</option>
+                                    @foreach($suppliers as $sup)
+                                        <option value="{{ $sup->supplier_id }}">{{ $sup->supplier_name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('supplier_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
 
-                        {{-- Description --}}
-                        <div class="space-y-1.5 mb-4">
-                            <label class="text-sm font-medium text-foreground">Description</label>
-                            <textarea name="description" rows="2" placeholder="Optional description..."
-                                class="flex w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('description') border-red-500 @enderror">{{ old('description') }}</textarea>
-                            @error('description')
-                                <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Category & Supplier --}}
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">Category</label>
-                                <div class="relative">
-                                    <select name="category_id"
-                                        class="flex h-10 w-full appearance-none rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('category_id') border-red-500 @enderror">
-                                        <option value="" disabled selected>Select...</option>
-                                        @foreach ($categories ?? [] as $cat)
-                                            <option value="{{ $cat->category_id }}"
-                                                {{ old('category_id') == $cat->category_id ? 'selected' : '' }}>
-                                                {{ $cat->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <x-dynamic-component component="lucide-chevron-down"
-                                        class="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                </div>
-                                @error('category_id')
-                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                                @enderror
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium">Order Date</label>
+                                <input type="date" name="order_date" x-model="editForm.order_date" class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none" >
+                                @error('order_date') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                             </div>
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">Supplier</label>
-                                <div class="relative">
-                                    <select name="supplier_id"
-                                        class="flex h-10 w-full appearance-none rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('supplier_id') border-red-500 @enderror">
-                                        <option value="" disabled selected>Select...</option>
-                                        @foreach ($suppliers ?? [] as $sup)
-                                            <option value="{{ $sup->supplier_id }}"
-                                                {{ old('supplier_id') == $sup->supplier_id ? 'selected' : '' }}>
-                                                {{ $sup->supplier_name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <x-dynamic-component component="lucide-chevron-down"
-                                        class="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                </div>
-                                @error('supplier_id')
-                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                                @enderror
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium">Status</label>
+                                <select name="status" x-model="editForm.status" class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none">
+                                    <option value="pending">Pending</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                                @error('status') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
 
-                        {{-- Quantity, Unit, Expiry --}}
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">Quantity</label>
-                                <input type="number" name="stock" placeholder="100" value="{{ old('stock') }}"
-                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('stock') border-red-500 @enderror">
-                                @error('stock')
-                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">Expiry</label>
-                                <input type="date" name="expired_date" value="{{ old('expired_date') }}"
-                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('expired_date') border-red-500 @enderror">
-                                @error('expired_date')
-                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        {{-- Medicine Items Table --}}
+                        <div class="border rounded-md overflow-hidden mb-4">
+                            <table class="w-full text-sm">
+                                <thead class="bg-muted text-muted-foreground">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Medicine</th>
+                                        <th class="px-4 py-2 w-24">Qty</th>
+                                        <th class="px-4 py-2 w-32">Price</th>
+                                        <th class="px-4 py-2 w-32 text-right">Subtotal</th>
+                                        <th class="px-4 py-2 w-10"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border">
+                                    <template x-for="(row, index) in editForm.medicines" :key="index">
+                                        <tr>
+                                            <td class="p-2">
+                                                <select :name="'medicines['+index+'][medicine_id]'" x-model="row.medicine_id" @change="updateRow(index)" class="w-full rounded-md border border-input bg-background px-2 py-1" >
+                                                    <option value="" disabled>Select...</option>
+                                                    <template x-for="med in medicineList" :key="med.medicine_id">
+                                                        <option :value="med.medicine_id" x-text="med.medicine_name"></option>
+                                                    </template>
+                                                </select>
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="number" :name="'medicines['+index+'][quantity]'" x-model="row.quantity" @input="updateRow(index)" min="1" class="w-full rounded-md border border-input bg-background px-2 py-1 text-center" >
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="number" :name="'medicines['+index+'][unit_price]'" x-model="row.unit_price" @input="updateRow(index)" class="w-full rounded-md border border-input bg-background px-2 py-1 text-right" >
+                                            </td>
+                                            <td class="p-2 text-right font-medium" x-text="'Rp ' + (row.quantity * row.unit_price).toLocaleString('id-ID')"></td>
+                                            <td class="p-2 text-center">
+                                                <button type="button" @click="removeMedicineRow(index)" class="text-red-500 hover:text-red-700"><x-dynamic-component component="lucide-trash" class="h-4 w-4" /></button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                                <tfoot class="bg-muted/50">
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-2 font-bold text-right">Grand Total:</td>
+                                        <td class="px-4 py-2 font-bold text-right text-lg text-primary" x-text="'Rp ' + grandTotal.toLocaleString('id-ID')"></td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
 
-                        {{-- Footer Buttons --}}
-                        <div class="pt-4 border-t border-border flex items-center justify-end gap-3">
-                            <button type="button" @click="showAddModal = false"
-                                class="h-10 px-4 rounded-md border bg-background hover:bg-accent hover:text-accent-foreground text-sm font-medium transition-colors">
-                                Cancel
-                            </button>
-                            <button type="submit"
-                                class="h-10 px-4 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors">
-                                Add Medicine
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+                        <button type="button" @click="addMedicineRow()" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 mb-6">
+                            <x-dynamic-component component="lucide-plus-circle" class="h-4 w-4" /> Add Item
+                        </button>
 
-
-        {{-- ========================================== --}}
-        {{-- MODAL EDIT MEDICINE --}}
-        {{-- ========================================== --}}
-        <div x-show="showEditModal" style="display: none;"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-
-            <div x-show="showEditModal" x-transition:enter="transition ease-out duration-300"
-                x-transition:leave="transition ease-in duration-200" x-transition:leave-end="opacity-0"
-                @click="showEditModal = false" class="fixed inset-0 bg-black/40 backdrop-blur-sm"></div>
-
-            <div x-show="showEditModal" x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                class="relative w-full max-w-lg bg-card rounded-xl shadow-lg border border-border flex flex-col max-h-[90vh] overflow-hidden">
-
-                <div class="px-6 py-4 border-b border-border flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold text-foreground">Edit Medicine</h3>
-                        <p class="text-sm text-muted-foreground">Update the medicine details below.</p>
-                    </div>
-                    <button @click="showEditModal = false" class="text-muted-foreground hover:text-foreground">
-                        <x-dynamic-component component="lucide-x" class="h-5 w-5" />
-                    </button>
-                </div>
-
-                <div class="p-6 overflow-y-auto space-y-4 custom-scrollbar">
-                    {{-- Form Edit Dynamic Action --}}
-                    <form :action="'{{ route('admin.medicine') }}/' + editForm.id" method="post">
-                        @csrf
-                        @method('PUT')
-
-                        {{-- Hidden ID untuk validasi unique ignore --}}
-                        <input type="hidden" name="medicine_id" x-model="editForm.id">
-
-                        {{-- Name --}}
-                        <div class="space-y-1.5 mb-4">
-                            <label class="text-sm font-medium text-foreground">Medicine Name</label>
-                            <input type="text" name="medicine_name" x-model="editForm.medicine_name"
-                                class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('medicine_name') border-red-500 @enderror">
-                            @error('medicine_name')
-                                <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- SKU & Price --}}
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">SKU / Code</label>
-                                <input type="text" name="sku" x-model="editForm.sku"
-                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('sku') border-red-500 @enderror">
-                                @error('sku')
-                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">Price (Rp)</label>
-                                <input type="number" name="price" x-model="editForm.price"
-                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('price') border-red-500 @enderror">
-                                @error('price')
-                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        {{-- Description --}}
-                        <div class="space-y-1.5 mb-4">
-                            <label class="text-sm font-medium text-foreground">Description</label>
-                            <textarea name="description" rows="2" x-model="editForm.description"
-                                class="flex w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('description') border-red-500 @enderror"></textarea>
-                            @error('description')
-                                <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Category & Supplier --}}
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">Category</label>
-                                <div class="relative">
-                                    <select name="category_id" x-model="editForm.category_id"
-                                        class="flex h-10 w-full appearance-none rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('category_id') border-red-500 @enderror">
-                                        <option value="" disabled>Select...</option>
-                                        @foreach ($categories ?? [] as $cat)
-                                            <option value="{{ $cat->category_id }}">{{ $cat->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <x-dynamic-component component="lucide-chevron-down"
-                                        class="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                </div>
-                                {{-- Perbaikan: Hapus karakter 'e' typo --}}
-                                @error('category_id')
-                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">Supplier</label>
-                                <div class="relative">
-                                    <select name="supplier_id" x-model="editForm.supplier_id"
-                                        class="flex h-10 w-full appearance-none rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('supplier_id') border-red-500 @enderror">
-                                        <option value="" disabled>Select...</option>
-                                        @foreach ($suppliers ?? [] as $sup)
-                                            <option value="{{ $sup->supplier_id }}">{{ $sup->supplier_name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <x-dynamic-component component="lucide-chevron-down"
-                                        class="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                </div>
-                                @error('supplier_id')
-                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">Quantity</label>
-                                <input type="number" name="stock" x-model="editForm.stock"
-                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('stock') border-red-500 @enderror">
-                                @error('stock')
-                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-sm font-medium text-foreground">Expiry</label>
-                                <input type="date" name="expired_date" x-model="editForm.expired_date"
-                                    class="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('expired_date') border-red-500 @enderror">
-                                @error('expired_date')
-                                    <p class="text-xs text-red-500 font-medium">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        {{-- Footer --}}
-                        <div class="pt-4 border-t border-border flex items-center justify-end gap-3">
-                            <button type="button" @click="showEditModal = false"
-                                class="h-10 px-4 rounded-md border bg-background hover:bg-accent hover:text-accent-foreground text-sm font-medium transition-colors">
-                                Cancel
-                            </button>
-                            <button type="submit"
-                                class="h-10 px-4 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors">
-                                Update Medicine
-                            </button>
+                        <div class="flex justify-end gap-3 pt-6 border-t border-border">
+                            <button type="button" @click="showAddModal = false; showEditModal = false" class="px-4 py-2 rounded-md border border-input hover:bg-muted">Cancel</button>
+                            <button type="submit" class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700">Save Order</button>
                         </div>
                     </form>
                 </div>

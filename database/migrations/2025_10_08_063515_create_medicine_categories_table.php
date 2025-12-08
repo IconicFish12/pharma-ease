@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('medicine_categories', function (Blueprint $table) {
             $table->uuid('category_id')->primary(true);
-            $table->string('name')->unique();
+            $table->string('name');
             $table->text('description')->nullable();
             $table->timestamps();
         });

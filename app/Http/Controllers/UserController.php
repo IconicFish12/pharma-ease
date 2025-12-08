@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,14 +16,19 @@ class UserController extends Controller
      */
     public function index()
     {
-        $data = User::paginate(request()->has('paginate') ?? 15)
-                ->toResourceCollection();
+        $data = User::latest()->paginate(request()->has('paginate') ?? 15);
 
         if (request()->wantsJson()) {
             return response()->json([
                 'status' => 'success',
                 'message' => 'User Data is fetch Successfully',
-                $data,
+                'data' => UserResource::collection($data),
+                'meta' => [
+                    'current_page' => $data->currentPage(),
+                    'last_page' => $data->lastPage(),
+                    'per_page' => $data->perPage(),
+                    'total' => $data->total(),
+                ]
             ]);
         }
 

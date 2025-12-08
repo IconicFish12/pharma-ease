@@ -22,10 +22,10 @@ class StoreMedicineOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => 'required|exists:users,user_id',
             'supplier_id' => 'required|exists:suppliers,supplier_id',
             'order_date' => 'required|date',
-            'status' => 'required|in:Pending,Completed,Cancelled',
-            // Validasi Array Medicines
+            'status' => 'required|in:pending,completed,cancelled',
             'medicines' => 'required|array|min:1',
             'medicines.*.medicine_id' => 'required|exists:medicines,medicine_id',
             'medicines.*.quantity' => 'required|integer|min:1',
@@ -36,7 +36,8 @@ class StoreMedicineOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'supplier_id.required' => 'Supplier harus dipilih.',
+            'user_id.required' => 'User wajib dipilih.',
+            'supplier_id.required' => 'Supplier wajib dipilih.',
             'medicines.required' => 'Minimal harus ada satu obat yang dipilih.',
             'medicines.*.medicine_id.required' => 'Obat tidak valid.',
             'medicines.*.quantity.min' => 'Jumlah obat minimal 1.',

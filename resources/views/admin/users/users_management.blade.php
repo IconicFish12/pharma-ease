@@ -76,6 +76,7 @@
                             <th class="px-6 py-4">Emp ID</th>
                             <th class="px-6 py-4">Role</th>
                             <th class="px-6 py-4">Shift</th>
+                            <th class="px-6 py-4">Salary</th>
                             <th class="px-6 py-4">Join Date</th>
                             <th class="px-6 py-4 text-right">Actions</th>
                         </tr>
@@ -96,6 +97,7 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 capitalize">{{ $item->shift ?? '-' }}</td>
+                                <td class="px-6 py-4 capitalize">@money($item->salary)</td>
                                 <td class="px-6 py-4">{{ date('d M Y', strtotime($item->start_date)) }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">

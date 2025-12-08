@@ -18,8 +18,8 @@ class MedicineCategoryResource extends JsonResource
         return [
             'id' => $this->category_id,
             'categoryName' => $this->name,
-            'createdAt' => Carbon::parse($this->created_at)->diffForHumans(),
-            'updatedAt' => Carbon::parse($this->updated_at)->diffForHumans()
+            'createdAt' => $this->created_at,
+            'updatedAt' => $this->updated_at
         ];
     }
 }

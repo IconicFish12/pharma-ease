@@ -13,7 +13,6 @@
             supplier_id: '{{ old('supplier_id') }}',
             stock: '{{ old('stock') }}',
             unit: '{{ old('unit') }}',
-            {{-- Tambahkan unit di sini --}}
             price: '{{ old('price') }}',
             expired_date: '{{ old('expired_date') }}'
         },

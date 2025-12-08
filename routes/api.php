@@ -14,9 +14,9 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::prefix('/admin')->name('admin.')->group(function () {
+Route::prefix('/admin')->group(function () {
 
-    Route::prefix('/medicine')->name('medicine')->group(function(){
+    Route::prefix('/medicine')->group(function(){
         Route::get('/', [MedicineController::class, 'index']);
         Route::post('/', [MedicineController::class, 'store']);
         Route::post('/show', [MedicineController::class, 'show']);
@@ -25,7 +25,7 @@ Route::prefix('/admin')->name('admin.')->group(function () {
     });
 
 
-    Route::prefix('/medicine-category')->name('medicine-category')->group(function(){
+    Route::prefix('/medicine-category')->group(function(){
         Route::get('/', [MedicineCategoryController::class, 'index']);
         Route::post('/', [MedicineCategoryController::class, 'store']);
         Route::post('/show', [MedicineCategoryController::class, 'show']);
@@ -33,7 +33,7 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::delete('/{medicineCategory:category_id}', [MedicineCategoryController::class, 'destroy']);
     });
 
-    Route::prefix('/medicine-order')->name('medicine-order')->group(function(){
+    Route::prefix('/medicine-order')->group(function(){
         Route::get('/', [MedicineOrderController::class, 'index']);
         Route::post('/', [MedicineOrderController::class, 'store']);
         Route::post('/show', [MedicineOrderController::class, 'show']);
@@ -41,7 +41,7 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::delete('/{medicineOrder:order_id}', [MedicineOrderController::class, 'destroy']);
     });
 
-    // Route::prefix('/activity-log')->name('activity-log')->group(function(){
+    // Route::prefix('/activity-log')->group(function(){
     //     Route::get('/', [ActivityLogController::class, 'index']);
     //     Route::post('/', [ActivityLogController::class, 'store']);
     //     Route::post('/show', [ActivityLogController::class, 'show']);
@@ -49,7 +49,7 @@ Route::prefix('/admin')->name('admin.')->group(function () {
     //     Route::delete('/{activityLog:id}', [ActivityLogController::class, 'destroy']);
     // });
 
-    Route::prefix('/suppliers')->name('suppliers-data')->group(function(){
+    Route::prefix('/suppliers')->group(function(){
         Route::get('/', [SupplierController::class, 'index']);
         Route::post('/', [SupplierController::class, 'store']);
         Route::post('/show', [SupplierController::class, 'show']);
@@ -57,7 +57,7 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::delete('/{supplier:supplier_id}', [SupplierController::class, 'destroy']);
     });
 
-    Route::prefix('/users')->name('users-data')->group(function(){
+    Route::prefix('/users')->group(function(){
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
         Route::post('/show', [UserController::class, 'show']);
@@ -65,11 +65,11 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::delete('/{user:user-id}', [UserController::class, 'destroy']);
     });
 
-    // Route::prefix('/reports')->name('pharmacy-report')->group(function(){
+    // Route::prefix('/reports')->group(function(){
     //     Route::get('/', [ReportController::class, 'index']);
     // });
 
-    // Route::prefix('/cashier-menu')->name('cashier-menu')->group(function(){
+    // Route::prefix('/cashier-menu')->group(function(){
     //     Route::get('/', [SalesTransactionController::class, 'index']);
     //     Route::post('/', [SalesTransactionController::class, 'store']);
     //     Route::post('/show', [SalesTransactionController::class, 'show']);

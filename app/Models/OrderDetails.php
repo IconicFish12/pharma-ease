@@ -10,12 +10,12 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class OrderDetails extends Pivot
 {
     /** @use HasFactory<\Database\Factories\OrderDetailsFactory> */
-    use HasUuids;
+    // use HasUuids;
     use HasFactory;
 
     protected $table = 'order_details';
 
-    protected $primaryKey = ['order_id', 'medicine_id'];
+    // protected $primaryKey = ['order_id', 'medicine_id'];
 
     protected $guarded = [];
 
