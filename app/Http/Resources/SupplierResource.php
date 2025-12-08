@@ -21,8 +21,8 @@ class SupplierResource extends JsonResource
             'contactPerson' => $this->contact_person,
             'phone' => $this->phone,
             'address' => $this->address,
-            'createdAt' => Carbon::parse($this->created_at)->diffForHumans(),
-            'updatedAt' => Carbon::parse($this->updated_at)->diffForHumans()
+            'createdAt' => $this->created_at,
+            'updatedAt' => $this->updated_at
         ];
     }
 }

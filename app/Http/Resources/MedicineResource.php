@@ -24,8 +24,8 @@ class MedicineResource extends JsonResource
             'price' => 'Rp ' . number_format($this->price, 0, ',', '.'),
             'category' => new MedicineCategoryResource($this->whenLoaded('category')),
             'suplier' => new SupplierResource($this->whenLoaded('supplier')),
-            'createdAt' => Carbon::parse($this->created_at)->diffForHumans(),
-            'updatedAt' => Carbon::parse($this->updated_at)->diffForHumans()
+            'createdAt' => $this->created_at,
+            'updatedAt' => $this->updated_at
         ];
     }
 }

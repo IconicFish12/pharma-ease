@@ -16,7 +16,7 @@ class MedicineOrder extends Model
 
     protected $primaryKey = 'order_id';
 
-    protected $guarded = ['order_id', 'order_code'];
+    protected $guarded = ['order_id'];
 
     public $incrementing = false;
 
@@ -29,7 +29,7 @@ class MedicineOrder extends Model
     }
 
     public function supplier() {
-        return $this->belongsToMany(
+        return $this->belongsTo(
             Supplier::class,
             'supplier_id',
             'supplier_id'

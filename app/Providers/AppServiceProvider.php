@@ -36,7 +36,6 @@ class AppServiceProvider extends ServiceProvider
                 'label' => 'Inventory',
                 'icon' => 'briefcase-medical',
                 'active_pattern' => 'inventory*',
-                // Ini akan memanggil route('admin.medicines.index')
                 'route' => 'admin.medicine'
             ],
             [
