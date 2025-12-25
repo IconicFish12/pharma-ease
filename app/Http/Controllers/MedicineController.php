@@ -8,7 +8,8 @@ use App\Http\Requests\UpdateMedicineRequest;
 use App\Http\Resources\MedicineResource;
 use App\Models\MedicineCategory;
 use App\Models\Supplier;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 class MedicineController extends Controller
 {
@@ -19,6 +20,28 @@ class MedicineController extends Controller
     {
         $data = Medicine::latest()->with(['category', 'supplier'])
                 ->paginate(request()->input('paginate', 15));
+
+        $expiredMedicines = Medicine::whereDate('expired_date', '<=', now())->get();
+
+        if ($expiredMedicines->count() > 0) {
+            Log::info("Ditemukan " . $expiredMedicines->count() . " obat expired.");;
+
+            foreach ($expiredMedicines as $med) {
+                $payload = [
+                    'type' => 'expired',
+                    'medicine_id' => $med->medicine_id,
+                    'medicine_name' => $med->medicine_name,
+                    'expired_date' => $med->expired_date,
+                    'timestamp' => now()->toDateTimeString()
+                ];
+
+                Redis::publish('notification_channel', json_encode($payload));
+            }
+
+            Log::info("Data berhasil dikirim ke Redis.");
+        } else {
+            Log::info("Tidak ada obat expired hari ini.");
+        }
 
         if (request()->wantsJson()) {
             return response()->json([
