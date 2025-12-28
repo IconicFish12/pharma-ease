@@ -74,12 +74,12 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::get('/', [ReportController::class, 'index']);
     });
 
-    Route::prefix('/cashier-menu')->name('cashier-menu')->group(function(){
-        Route::get('/', [SalesTransactionController::class, 'index']);
-        Route::post('/', [SalesTransactionController::class, 'store']);
-        Route::post('/show', [SalesTransactionController::class, 'show']);
-        Route::put('/{medicine:id}', [SalesTransactionController::class, 'update']);
-        Route::delete('/{medicine:id}', [SalesTransactionController::class, 'destroy']);
-    });
+    Route::prefix('/cashier-menu')->group(function(){
+    // Menampilkan halaman (GET)
+    Route::get('/', [SalesTransactionController::class, 'index'])->name('cashier-menu');
+
+    // Memproses data (POST) - route name ini yang dipanggil di JavaScript fetch
+    Route::post('/', [SalesTransactionController::class, 'store'])->name('transaction.store');
+});
 
 });
