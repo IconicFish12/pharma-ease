@@ -11,9 +11,6 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $data = User::latest()->paginate(request()->has('paginate') ?? 15);
@@ -41,18 +38,9 @@ class UserController extends Controller
             'shifts' => ['pagi', 'siang', 'malam'],
         ]);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreUserRequest $request)
     {
         try {
@@ -78,29 +66,20 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(User $user)
     {
-        //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(User $user)
     {
-        //
+
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+
     public function update(UpdateUserRequest $request, User $user)
     {
         try {
-            $user = User::where('user_id', $user->id)->firstOrFail();
+
             $validated = $request->validated();
 
             if (empty($validated['password'])) {
@@ -124,13 +103,9 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(User $user)
     {
         try {
-            $user = User::where('user_id', $user->id)->firstOrFail();
             $user->delete();
 
             if (request()->wantsJson()) {

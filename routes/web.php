@@ -27,7 +27,6 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::delete('/{medicine:medicine_id}', [MedicineController::class, 'destroy']);
     });
 
-
     Route::prefix('/medicine-category')->name('medicine-category')->group(function(){
         Route::get('/', [MedicineCategoryController::class, 'index']);
         Route::post('/', [MedicineCategoryController::class, 'store']);
@@ -64,8 +63,9 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
         Route::post('/show', [UserController::class, 'show']);
-        Route::put('/{user:user_id}', [UserController::class, 'update']);
-        Route::delete('/{user:user-id}', [UserController::class, 'destroy']);
+        
+        Route::put('/{user}', [UserController::class, 'update']);
+        Route::delete('/{user}', [UserController::class, 'destroy']);
     });
 
     Route::prefix('/reports')->name('pharmacy-report')->group(function(){
