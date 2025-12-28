@@ -24,7 +24,7 @@ class SalesTransaction extends Model
 
     protected $primaryKey = 'sales_id';
 
-    protected $guarded = ['sales_id', 'kode_penjualan'];
+    protected $guarded = ['sales_id'];
 
     public $incrementing = false;
 
