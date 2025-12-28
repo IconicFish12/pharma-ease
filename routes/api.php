@@ -50,13 +50,13 @@ Route::prefix('/admin')->group(function () {
         Route::delete('/{medicineOrder:order_id}', [MedicineOrderController::class, 'destroy']);
     });
 
-    // Route::prefix('/activity-log')->group(function(){
-    //     Route::get('/', [ActivityLogController::class, 'index']);
-    //     Route::post('/', [ActivityLogController::class, 'store']);
-    //     Route::post('/show', [ActivityLogController::class, 'show']);
-    //     Route::put('/{activityLog:id}', [ActivityLogController::class, 'update']);
-    //     Route::delete('/{activityLog:id}', [ActivityLogController::class, 'destroy']);
-    // });
+    Route::prefix('/activity-log')->group(function(){
+        Route::get('/', [ActivityLogController::class, 'index']);
+        Route::post('/', [ActivityLogController::class, 'store']);
+        Route::post('/show', [ActivityLogController::class, 'show']);
+        Route::put('/{activityLog:id}', [ActivityLogController::class, 'update']);
+        Route::delete('/{activityLog:id}', [ActivityLogController::class, 'destroy']);
+    });
 
     Route::prefix('/suppliers')->group(function(){
         Route::get('/', [SupplierController::class, 'index']);

@@ -62,32 +62,35 @@
                 </div>
                 
                 <div class="relative inline-block text-left group">
+    
     <button type="button" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>
         Export Log
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
     </button>
 
-    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 hidden group-hover:block border border-gray-200">
-        <div class="py-1">
+    <div class="absolute right-0 top-full pt-2 w-48 hidden group-hover:block z-50">
+        <div class="bg-white rounded-md shadow-lg border border-gray-200 overflow-hidden">
+            
             <a href="{{ route('audit-logs.export', array_merge(request()->all(), ['format' => 'xlsx'])) }}" 
-               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-green-600 flex items-center gap-2">
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 flex items-center gap-2 transition-colors">
                📄 Export to Excel
             </a>
             
             <a href="{{ route('audit-logs.export', array_merge(request()->all(), ['format' => 'csv'])) }}" 
-               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-green-600 flex items-center gap-2">
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 flex items-center gap-2 transition-colors">
                📝 Export to CSV
             </a>
 
             <a href="{{ route('audit-logs.export', array_merge(request()->all(), ['format' => 'pdf'])) }}" 
-               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-red-600 flex items-center gap-2">
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 flex items-center gap-2 transition-colors">
                📕 Export to PDF
             </a>
+            
         </div>
     </div>
 </div>
