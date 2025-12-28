@@ -9,8 +9,6 @@ use App\Http\Requests\UpdateMedicineRequest;
 use App\Http\Resources\MedicineResource;
 use App\Models\MedicineCategory;
 use App\Models\Supplier;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 
 class MedicineController extends Controller
 {
@@ -116,8 +114,10 @@ class MedicineController extends Controller
     public function update(UpdateMedicineRequest $request, Medicine $medicine)
     {
         try {
-            $medicine = Medicine::findOrFail($medicine->medicine_id);
+            // dd($medicine->medicine_id);
+            // $medicine = Medicine::findOrFail($medicine->medicine_id);
             $data = $medicine->update($request->validated());
+
 
             if ($request->wantsJson()) {
                 return response()->json([

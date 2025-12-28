@@ -19,7 +19,7 @@ class UpdateMedicineRequest extends FormRequest
 
         return [
             'medicine_name' => 'required|string|min:5|max:255',
-            'sku' => 'required|string|max:100|unique:medicines,sku,',
+            'sku' => 'required|string|max:100',
             'description' => 'nullable|string|min:10',
             'category_id' => 'required|exists:medicine_categories,category_id',
             'supplier_id' => 'required||exists:suppliers,supplier_id',

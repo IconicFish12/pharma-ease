@@ -107,7 +107,7 @@ class MedicineCategoryController extends Controller
 
                 return back();
             }
-            $data = $medicineCategory->find($medicineCategory->category_id)->update($request->validated());
+            $data = $medicineCategory->update($request->validated());
 
             if ($request->wantsJson()) {
                 return response()->json([

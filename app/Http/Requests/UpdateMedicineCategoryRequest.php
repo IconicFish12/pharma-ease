@@ -22,7 +22,7 @@ class UpdateMedicineCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|unique:medicine_categories|string',
+            'name' => 'required|string',
             'description' => 'required|string'
         ];
     }
@@ -38,7 +38,6 @@ class UpdateMedicineCategoryRequest extends FormRequest
             'name.required' => 'input nama kategori tidak boleh kosong',
             'description.required' => 'input deskripsi kategori tidak boleh kosong',
             'description.string' => 'input deskripsi kategori hanya boleh disi karakter huruf',
-            'name.unique' => 'input nama kategori sudah terdaftar',
             'name.string' => 'input nama kategori kategori hanya boleh disi karakter huruf',
 
         ];
