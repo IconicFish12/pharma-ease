@@ -10,19 +10,32 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $data = User::paginate(request()->has('paginate') ?? 15)
-                ->toResourceCollection();
+        $query = User::query();
 
-        if (request()->wantsJson()) {
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('user_id', 'like', "%{$search}%"); 
+            });
+        }
+
+        $limit = $request->input('paginate', 15); 
+        
+        $data = $query->paginate($limit);
+
+        if (method_exists($data, 'toResourceCollection')) {
+            $data = $data->toResourceCollection();
+        }
+
+        if ($request->wantsJson()) {
             return response()->json([
                 'status' => 'success',
-                'message' => 'User Data is fetch Successfully',
-                $data,
+                'message' => 'User Data fetched Successfully',
+                'data' => $data,
             ]);
         }
 
@@ -36,22 +49,15 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreUserRequest $request)
     {
         try {
             $validated = $request->validated();
-
             $validated['password'] = Hash::make($validated['password']);
 
             User::create($validated);
@@ -72,29 +78,19 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(User $user)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(User $user)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateUserRequest $request, User $user)
     {
         try {
-            $user = User::where('user_id', $user->id)->firstOrFail();
             $validated = $request->validated();
 
             if (empty($validated['password'])) {
@@ -111,20 +107,16 @@ class UserController extends Controller
             return redirect()->back()->with('success', 'User updated successfully');
 
         } catch (\Exception $e) {
-            if ($request->wantsJson()) {
+            if ($request->wantsJson()) {    
                 return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
             }
             return redirect()->back()->with('error', 'Failed: ' . $e->getMessage())->withInput();
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(User $user)
     {
         try {
-            $user = User::where('user_id', $user->id)->firstOrFail();
             $user->delete();
 
             if (request()->wantsJson()) {
