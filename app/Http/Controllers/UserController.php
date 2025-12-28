@@ -13,7 +13,19 @@ class UserController extends Controller
 {
     public function index()
     {
-        $data = User::latest()->paginate(request()->has('paginate') ?? 15);
+        $query = User::latest();
+
+        if (request('search')) {
+            $search = request('search');
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%')
+                  ->orWhere('emp_id', 'like', '%' . $search . '%')
+                  ->orWhere('role', 'like', '%' . $search . '%');
+            });
+        }
+
+        $data = $query->paginate(request('paginate', 15))->withQueryString();
 
         if (request()->wantsJson()) {
             return response()->json([
@@ -38,14 +50,15 @@ class UserController extends Controller
             'shifts' => ['pagi', 'siang', 'malam'],
         ]);
     }
+
     public function create()
     {
     }
+
     public function store(StoreUserRequest $request)
     {
         try {
             $validated = $request->validated();
-
             $validated['password'] = Hash::make($validated['password']);
 
             User::create($validated);
@@ -72,14 +85,12 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-
     }
 
 
     public function update(UpdateUserRequest $request, User $user)
     {
         try {
-
             $validated = $request->validated();
 
             if (empty($validated['password'])) {
