@@ -15,11 +15,11 @@
             alamat: '{{ old('alamat') }}',
             salary: '{{ old('salary') }}',
             start_date: '{{ old('start_date') }}',
-            password: '' // Kosongkan saat edit (hanya diisi jika ingin ganti)
+            password: '' 
         },
         openEditModal(item) {
             this.editForm = {
-                id: item.user_id,
+                id: item.user_id, // Pastikan ini sesuai dengan primary key di model (user_id atau id)
                 name: item.name,
                 emp_id: item.emp_id,
                 email: item.email,
@@ -54,11 +54,14 @@
             <div class="p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h3 class="font-semibold text-lg text-foreground">User Management</h3>
                 <div class="flex items-center gap-3">
+                    {{-- SEARCH FORM --}}
+                    {{-- Action dikosongkan agar submit ke URL halaman saat ini --}}
                     <form action="" method="GET" class="relative w-full sm:w-64">
                         <x-dynamic-component component="lucide-search" class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <input type="text" name="search" placeholder="Search users..." value="{{ request('search') }}"
                             class="w-full h-9 pl-9 pr-4 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-ring focus:outline-none">
                     </form>
+                    
                     <button @click="showAddModal = true" class="h-9 px-4 inline-flex items-center justify-center gap-2 rounded-md bg-green-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors shadow-sm">
                         <x-dynamic-component component="lucide-plus" class="h-4 w-4" />
                         Add User
@@ -84,7 +87,7 @@
                     <tbody class="divide-y divide-border">
                         @forelse ($dataArr as $item)
                             <tr class="hover:bg-muted/20 transition-colors">
-                                <td class="px-6 py-4">{{ $loop->iteration }}</td>
+                                <td class="px-6 py-4">{{ $loop->iteration + ($dataArr->currentPage() - 1) * $dataArr->perPage() }}</td>
                                 <td class="px-6 py-4">
                                     <div class="font-medium text-foreground">{{ $item->name }}</div>
                                     <div class="text-xs text-muted-foreground">{{ $item->email }}</div>
@@ -104,7 +107,8 @@
                                         <button @click="openEditModal({{ json_encode($item) }})" class="p-2 text-orange-600 hover:bg-blue-50 rounded-md transition-colors">
                                             <x-dynamic-component component="lucide-pencil" class="h-4 w-4" />
                                         </button>
-                                        <form action="{{ asset("/admin/users/$item->user_id") }}" method="POST" onsubmit="return confirm('Delete this user?');">
+                                        {{-- Pastikan route destroy benar --}}
+                                        <form action="{{ route('admin.users-data', $item) }}" method="POST" onsubmit="return confirm('Delete this user?');">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors">
                                                 <x-dynamic-component component="lucide-trash-2" class="h-4 w-4" />
@@ -115,10 +119,10 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="px-6 py-12 text-center text-muted-foreground">
+                                <td colspan="8" class="px-6 py-12 text-center text-muted-foreground">
                                     <div class="flex flex-col items-center justify-center gap-2">
                                         <x-dynamic-component component="lucide-user" class="h-8 w-8 opacity-50" />
-                                        <p>No User found in inventory.</p>
+                                        <p>No User found.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -129,6 +133,7 @@
             <div class="p-4 border-t border-border">{{ $dataArr->links() }}</div>
         </div>
 
+        {{-- Modal Logic (Add & Edit) --}}
         <div x-show="showAddModal || showEditModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
             <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" @click="showAddModal = false; showEditModal = false"></div>
 
@@ -139,11 +144,12 @@
                 </div>
 
                 <div class="p-6 overflow-y-auto custom-scrollbar">
+                    {{-- Form handling for both Add and Edit --}}
+                    {{-- Menggunakan route users-data tanpa ID di action form, ID akan dihandle Laravel jika method PUT --}}
                     <form :action="showEditModal ? '{{ route('admin.users-data') }}/' + editForm.id : '{{ route('admin.users-data') }}'" method="POST">
                         @csrf
                         <template x-if="showEditModal"><input type="hidden" name="_method" value="PUT"></template>
-                        <template x-if="showEditModal"><input type="hidden" name="id" x-model="editForm.id"></template>
-
+                        
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="space-y-1">
                                 <label class="text-sm font-medium">Full Name</label>
