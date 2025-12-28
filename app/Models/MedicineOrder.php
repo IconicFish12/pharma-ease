@@ -11,7 +11,11 @@ class MedicineOrder extends Model
     /** @use HasFactory<\Database\Factories\MedicineOrderFactory> */
     use HasUuids;
     use HasFactory;
+    use \App\Traits\Auditable;
 
+    public function getCustomModuleName() {
+        return 'Transaction Details Management';
+    }
     protected $table = 'medicine_orders';
 
     protected $primaryKey = 'order_id';

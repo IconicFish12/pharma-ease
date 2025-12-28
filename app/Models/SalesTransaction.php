@@ -15,6 +15,10 @@ class SalesTransaction extends Model
     /** @use HasFactory<\Database\Factories\SalesTransactionFactory> */
     use HasUuids;
     use HasFactory;
+    use \App\Traits\Auditable;
+    public function getCustomModuleName() {
+        return 'Transaction Details Management';
+    }
 
     protected $table = 'sales_transactions';
 

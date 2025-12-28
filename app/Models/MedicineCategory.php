@@ -14,6 +14,11 @@ class MedicineCategory extends Model
     /** @use HasFactory<\Database\Factories\MedicineCategoryFactory> */
     use HasUuids;
     use HasFactory;
+    use \App\Traits\Auditable;
+
+    public function getCustomModuleName() {
+        return 'Inventory';
+    }
 
     protected $table = 'medicine_categories';
 

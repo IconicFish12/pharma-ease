@@ -12,6 +12,11 @@ class TransactionDetails extends Pivot
     /** @use HasFactory<\Database\Factories\TransactionDetailsFactory> */
     use HasUuids;
     use HasFactory;
+    use \App\Traits\Auditable;
+
+    public function getCustomModuleName() {
+        return 'Transaction Details Management';
+    }
 
     protected $table = 'transaction_details';
 
