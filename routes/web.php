@@ -65,7 +65,7 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
         Route::post('/show', [UserController::class, 'show']);
-        
+
         Route::put('/{user}', [UserController::class, 'update']);
         Route::delete('/{user}', [UserController::class, 'destroy']);
     });
@@ -78,8 +78,8 @@ Route::prefix('/admin')->name('admin.')->group(function () {
         Route::get('/', [SalesTransactionController::class, 'index']);
         Route::post('/', [SalesTransactionController::class, 'store']);
         Route::post('/show', [SalesTransactionController::class, 'show']);
-        Route::put('/{medicine:id}', [SalesTransactionController::class, 'update']);
-        Route::delete('/{medicine:id}', [SalesTransactionController::class, 'destroy']);
+        Route::put('/{medicine:medicine_id}', [SalesTransactionController::class, 'update']);
+        Route::delete('/{medicine:medicine_id}', [SalesTransactionController::class, 'destroy']);
     });
 
 });

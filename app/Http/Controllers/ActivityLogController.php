@@ -16,27 +16,22 @@ class ActivityLogController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Mulai Query Dasar
         $query = Activity::with('causer')->latest();
 
-        // 2. Filter Module (Jika ada input 'module')
         if ($request->filled('module')) {
             $query->where('log_name', $request->module);
         }
 
-        // 3. Filter Action (Jika ada input 'action')
-        // Action di sini mengacu pada kolom 'description' (Created, Updated, Login)
         if ($request->filled('action')) {
             $query->where('description', $request->action);
         }
 
-        // 4. Filter Search (Cari di properties/detail atau nama user)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('properties', 'like', "%$search%") // Cari di detail pesan/IP
+                $q->where('properties', 'like', "%$search%")
                     ->orWhereHas('causer', function ($user) use ($search) {
-                        $user->where('name', 'like', "%$search%"); // Cari nama user
+                        $user->where('name', 'like', "%$search%");
                     });
             });
         }
