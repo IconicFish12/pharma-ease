@@ -40,7 +40,7 @@ class ActivityLogController extends Controller
         }
 
         // 5. Ambil Data (Pakai paginate biar enteng)
-        $logs = Activity::with('causer')->latest()->get();
+        $logs = $query->paginate(10)->withQueryString();
         return view('admin.audit_log.activity_management', compact('logs'));
     }
 

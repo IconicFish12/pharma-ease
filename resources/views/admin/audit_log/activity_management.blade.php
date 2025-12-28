@@ -15,49 +15,50 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
                 
                 <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                <form action="" method="GET" class="flex flex-col md:flex-row gap-4 mb-6">
+                    <form action="" method="GET" class="flex flex-col md:flex-row gap-4 mb-6">
     
-                    <div class="relative w-full md:w-64">
-                        <input 
-                            type="text" 
-                            name="search" 
-                            value="{{ request('search') }}" 
-                            placeholder="Search activities..." 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                        >
-                    </div>
+    <div class="relative w-full md:w-64">
+        <input 
+            type="text" 
+            name="search" 
+            value="{{ request('search') }}" 
+            placeholder="Search activities..." 
+            class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+        </div>
 
-                        <select 
-                            name="action" 
-                            onchange="this.form.submit()" 
-                            class="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer"
-                        >
-                            <option value="">All Actions</option>
-                            <option value="Login" {{ request('action') == 'Login' ? 'selected' : '' }}>Login</option>
-                            <option value="Created" {{ request('action') == 'Created' ? 'selected' : '' }}>Created</option>
-                            <option value="Updated" {{ request('action') == 'Updated' ? 'selected' : '' }}>Updated</option>
-                            <option value="Deleted" {{ request('action') == 'Deleted' ? 'selected' : '' }}>Deleted</option>
-                        </select>
+    <select 
+        name="action" 
+        onchange="this.form.submit()" 
+        class="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer"
+    >
+        <option value="">All Actions</option>
+        <option value="Login" {{ request('action') == 'Login' ? 'selected' : '' }}>Login</option>
+        <option value="Created" {{ request('action') == 'Created' ? 'selected' : '' }}>Created</option>
+        <option value="Updated" {{ request('action') == 'Updated' ? 'selected' : '' }}>Updated</option>
+        <option value="Deleted" {{ request('action') == 'Deleted' ? 'selected' : '' }}>Deleted</option>
+    </select>
 
-                        <select 
-                            name="module" 
-                            onchange="this.form.submit()" 
-                            class="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer"
-                        >
-                            <option value="">All Modules</option>
-                            <option value="Authentication" {{ request('module') == 'Authentication' ? 'selected' : '' }}>Authentication</option>
-                            <option value="User Management" {{ request('module') == 'User Management' ? 'selected' : '' }}>User Management</option>
-                            <option value="Inventory" {{ request('module') == 'Inventory' ? 'selected' : '' }}>Inventory</option>
-                            <option value="Supplier Management" {{ request('module') == 'Supplier Management' ? 'selected' : '' }}>Suppliers</option>
-                            <option value="Transaction Details Management" {{ request('module') == 'Transaction Details Management' ? 'selected' : '' }}>Transactions</option>
-                        </select>
+    <select 
+        name="module" 
+        onchange="this.form.submit()" 
+        class="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer"
+    >
+        <option value="">All Modules</option>
+        <option value="Authentication" {{ request('module') == 'Authentication' ? 'selected' : '' }}>Authentication</option>
+        <option value="User Management" {{ request('module') == 'User Management' ? 'selected' : '' }}>User Management</option>
+        <option value="Inventory" {{ request('module') == 'Inventory' ? 'selected' : '' }}>Inventory</option>
+        <option value="Supplier Management" {{ request('module') == 'Supplier Management' ? 'selected' : '' }}>Suppliers</option>
+        <option value="Transaction Details Management" {{ request('module') == 'Transaction Details Management' ? 'selected' : '' }}>Transactions</option>
+    </select>
 
-                    @if(request('search') || request('action') || request('module'))
-                        <a href="{{ url()->current() }}" class="px-4 py-2 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 transition text-sm flex items-center">
-                            Reset Filter
-                        </a>
-                        @endif
-                </form>
+    @if(request('search') || request('action') || request('module'))
+    <a href="{{ url()->current() }}" class="px-4 py-2 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 transition text-sm flex items-center">
+        Reset Filter
+    </a>
+    @endif
+
+</form>
                 </div>
                 
                 <button class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
