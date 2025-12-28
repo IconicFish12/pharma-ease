@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { createClient } from "redis";
 import admin from "firebase-admin";
-import service from "./firebase/firebase-service-account.json";
+import service from "./firebase/firebase-service-account.json" with { type: "json" };
 
 dotenv.config();
 
