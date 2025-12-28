@@ -61,13 +61,36 @@
 </form>
                 </div>
                 
-                <button class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                    </svg>
-    
-                    <span class="font-medium text-sm">Export Audit Log</span>
-                </button>
+                <div class="relative inline-block text-left group">
+    <button type="button" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        Export Log
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+    </button>
+
+    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 hidden group-hover:block border border-gray-200">
+        <div class="py-1">
+            <a href="{{ route('audit-logs.export', array_merge(request()->all(), ['format' => 'xlsx'])) }}" 
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-green-600 flex items-center gap-2">
+               📄 Export to Excel
+            </a>
+            
+            <a href="{{ route('audit-logs.export', array_merge(request()->all(), ['format' => 'csv'])) }}" 
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-green-600 flex items-center gap-2">
+               📝 Export to CSV
+            </a>
+
+            <a href="{{ route('audit-logs.export', array_merge(request()->all(), ['format' => 'pdf'])) }}" 
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-red-600 flex items-center gap-2">
+               📕 Export to PDF
+            </a>
+        </div>
+    </div>
+</div>
             </div>
 
             <div class="overflow-x-auto">

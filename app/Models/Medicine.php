@@ -18,7 +18,7 @@ class Medicine extends Model
     use \App\Traits\Auditable;
 
     public function getCustomModuleName() {
-        return 'Inventory2';
+        return 'Inventory';
     }
 
     protected $table = 'medicines';

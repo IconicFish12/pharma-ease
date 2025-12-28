@@ -15,6 +15,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/audit-logs/export', [ActivityLogController::class, 'export'])->name('audit-logs.export');
+
 Route::prefix('/admin')->name('admin.')->group(function () {
 
     Route::get('/', [BaseController::class, 'index'])->name('dashboard');

@@ -6,6 +6,8 @@ use App\Http\Requests\StoreActivityLogRequest;
 use App\Http\Requests\UpdateActivityLogRequest;
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
+use App\Exports\ActivityExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ActivityLogController extends Controller
 {
@@ -42,6 +44,23 @@ class ActivityLogController extends Controller
         // 5. Ambil Data (Pakai paginate biar enteng)
         $logs = $query->paginate(10)->withQueryString();
         return view('admin.audit_log.activity_management', compact('logs'));
+    }
+
+    public function export(Request $request)
+    {
+        // Validasi format yang diminta (xlsx, csv, atau pdf)
+        $format = $request->input('format', 'xlsx');
+
+        $fileName = 'audit_log_' . date('Y-m-d_H-i') . '.' . $format;
+
+        // Tentukan Library Writer berdasarkan format
+        $writerType = match ($format) {
+            'pdf' => \Maatwebsite\Excel\Excel::DOMPDF,
+            'csv' => \Maatwebsite\Excel\Excel::CSV,
+            default => \Maatwebsite\Excel\Excel::XLSX,
+        };
+
+        return Excel::download(new ActivityExport($request), $fileName, $writerType);
     }
 
     /**
