@@ -16,32 +16,32 @@ class ActivityLogController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Mulai Query Dasar
         $query = Activity::with('causer')->latest();
 
-        // 2. Filter Module (Jika ada input 'module')
-        if ($request->filled('module')) {
+        // Filter Module
+        if ($request->filled('module') && $request->module !== 'all') {
             $query->where('log_name', $request->module);
         }
 
-        // 3. Filter Action (Jika ada input 'action')
-        // Action di sini mengacu pada kolom 'description' (Created, Updated, Login)
-        if ($request->filled('action')) {
+        // Filter Action
+        if ($request->filled('action') && $request->action !== 'all') {
             $query->where('description', $request->action);
         }
 
-        // 4. Filter Search (Cari di properties/detail atau nama user)
+        // Search
         if ($request->filled('search')) {
             $search = $request->search;
+
             $query->where(function ($q) use ($search) {
-                $q->where('properties', 'like', "%$search%") // Cari di detail pesan/IP
+                $q->where('properties', 'like', "%$search%")
+                    ->orWhere('description', 'like', "%$search%")
+                    ->orWhere('log_name', 'like', "%$search%")
                     ->orWhereHas('causer', function ($user) use ($search) {
-                        $user->where('name', 'like', "%$search%"); // Cari nama user
+                        $user->where('name', 'like', "%$search%");
                     });
             });
         }
 
-        // 5. Ambil Data (Pakai paginate biar enteng)
         $logs = $query->paginate(10)->withQueryString();
         return view('admin.audit_log.activity_management', compact('logs'));
     }
