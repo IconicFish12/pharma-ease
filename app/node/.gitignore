@@ -1,1 +1,3 @@
 node_modules
+firebase
+app/node/firebase/firebase-service-account.json
