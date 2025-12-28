@@ -82,12 +82,9 @@ Route::prefix('/admin')->middleware('auth')->name('admin.')->group(function () {
         Route::get('/', [ReportController::class, 'index']);
     });
 
-    Route::prefix('/cashier-menu')->name('cashier-menu')->group(function(){
-        Route::get('/', [SalesTransactionController::class, 'index']);
-        Route::post('/', [SalesTransactionController::class, 'store']);
-        Route::post('/show', [SalesTransactionController::class, 'show']);
-        Route::put('/{medicine:medicine_id}', [SalesTransactionController::class, 'update']);
-        Route::delete('/{medicine:medicine_id}', [SalesTransactionController::class, 'destroy']);
+    Route::prefix('/cashier-menu')->group(function(){
+        Route::get('/', [SalesTransactionController::class, 'index'])->name('cashier-menu');
+        Route::post('/', [SalesTransactionController::class, 'store'])->name('transaction.store');
     });
 
 });

@@ -18,25 +18,30 @@ class ActivityLogController extends Controller
     {
         $query = Activity::with('causer')->latest();
 
-        if ($request->filled('module')) {
+        // Filter Module
+        if ($request->filled('module') && $request->module !== 'all') {
             $query->where('log_name', $request->module);
         }
 
-        if ($request->filled('action')) {
+        // Filter Action
+        if ($request->filled('action') && $request->action !== 'all') {
             $query->where('description', $request->action);
         }
 
+        // Search
         if ($request->filled('search')) {
             $search = $request->search;
+
             $query->where(function ($q) use ($search) {
                 $q->where('properties', 'like', "%$search%")
+                    ->orWhere('description', 'like', "%$search%")
+                    ->orWhere('log_name', 'like', "%$search%")
                     ->orWhereHas('causer', function ($user) use ($search) {
                         $user->where('name', 'like', "%$search%");
                     });
             });
         }
 
-        // 5. Ambil Data (Pakai paginate biar enteng)
         $logs = $query->paginate(10)->withQueryString();
         return view('admin.audit_log.activity_management', compact('logs'));
     }
