@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ExpiredMedicine;
 use App\Models\Medicine;
 use App\Http\Requests\StoreMedicineRequest;
 use App\Http\Requests\UpdateMedicineRequest;
@@ -24,23 +25,7 @@ class MedicineController extends Controller
         $expiredMedicines = Medicine::whereDate('expired_date', '<=', now())->get();
 
         if ($expiredMedicines->count() > 0) {
-            Log::info("Ditemukan " . $expiredMedicines->count() . " obat expired.");;
-
-            foreach ($expiredMedicines as $med) {
-                $payload = [
-                    'type' => 'expired',
-                    'medicine_id' => $med->medicine_id,
-                    'medicine_name' => $med->medicine_name,
-                    'expired_date' => $med->expired_date,
-                    'timestamp' => now()->toDateTimeString()
-                ];
-
-                Redis::publish('notification_channel', json_encode($payload));
-            }
-
-            Log::info("Data berhasil dikirim ke Redis.");
-        } else {
-            Log::info("Tidak ada obat expired hari ini.");
+           ExpiredMedicine::dispatch($expiredMedicines);
         }
 
         if (request()->wantsJson()) {
