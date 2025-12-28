@@ -38,7 +38,7 @@ class AuthController extends Controller
         try {
             if (!$validation->fails()) {
                 if (Auth::attempt($request->only(['email', 'password']), $request->remember_me)) {
-                    
+
                     $user = User::where('email', $request->email)->first();
                     try {
                         activity()
@@ -54,7 +54,7 @@ class AuthController extends Controller
                     } catch (\Exception $e) {
                         \Illuminate\Support\Facades\Log::error('Gagal simpan log login: ' . $e->getMessage());
                     }
-                    
+
 
 
                     if ($request->wantsJson()) {
@@ -72,7 +72,7 @@ class AuthController extends Controller
 
                     $request->session()->regenerate();
 
-                    return redirect()->intended('/admin')->with('success', 'Selamat datang kembali!');
+                    return redirect()->intended('/admin')->with('login-success', 'Selamat datang kembali!');
                 }
 
             }
@@ -130,6 +130,6 @@ class AuthController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->to('/login')->with('logout-success', 'Successfully Logout');
     }
 }

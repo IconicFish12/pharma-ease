@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\MedicineCategoryController;
 use App\Http\Controllers\MedicineController;
@@ -15,11 +16,18 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'loginView'])->name('login');
+    Route::post('/login', [AuthController::class, 'loginProcess'])->name('login.signIn');
+});
+
 Route::get('/audit-logs/export', [ActivityLogController::class, 'export'])->name('audit-logs.export');
 
-Route::prefix('/admin')->name('admin.')->group(function () {
+Route::prefix('/admin')->middleware('auth')->name('admin.')->group(function () {
 
     Route::get('/', [BaseController::class, 'index'])->name('dashboard');
+
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::prefix('/medicine')->name('medicine')->group(function(){
         Route::get('/', [MedicineController::class, 'index']);

@@ -1,5 +1,17 @@
 @extends('template.dashboard')
 @section('admin-dashboard')
+    @if (session('login-success'))
+        <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show" x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+            class="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3">
+            <x-dynamic-component component="lucide-check-circle" class="h-5 w-5 shrink-0 text-emerald-600" />
+            <div>
+                <h4 class="font-semibold text-sm">Success</h4>
+                <p class="text-sm">{{ session('login-success') }}</p>
+            </div>
+        </div>
+    @endif
+
     <!-- Stats Grid -->
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <!-- Card 1 -->

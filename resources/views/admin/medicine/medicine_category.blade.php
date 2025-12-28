@@ -22,36 +22,30 @@
         <div class="bg-card rounded-xl border border-border shadow-sm">
 
             @if (session('success'))
-            <div x-data="{ show: true }"
-                 x-init="setTimeout(() => show = false, 3000)"
-                 x-show="show"
-                 x-transition:leave="transition ease-in duration-300"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"
-                 class="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3">
-                <x-dynamic-component component="lucide-check-circle" class="h-5 w-5 shrink-0 text-emerald-600" />
-                <div>
-                    <h4 class="font-semibold text-sm">Success</h4>
-                    <p class="text-sm">{{ session('success') }}</p>
+                <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
+                    x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3">
+                    <x-dynamic-component component="lucide-check-circle" class="h-5 w-5 shrink-0 text-emerald-600" />
+                    <div>
+                        <h4 class="font-semibold text-sm">Success</h4>
+                        <p class="text-sm">{{ session('success') }}</p>
+                    </div>
                 </div>
-            </div>
-        @endif
+            @endif
 
-        @if (session('error'))
-            <div x-data="{ show: true }"
-                 x-init="setTimeout(() => show = false, 3000)"
-                 x-show="show"
-                 x-transition:leave="transition ease-in duration-300"
-                 x-transition:leave-start="opacity-100"
-                 x-transition:leave-end="opacity-0"
-                 class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 flex items-center gap-3">
-                <x-dynamic-component component="lucide-alert-circle" class="h-5 w-5 shrink-0 text-red-600" />
-                <div>
-                    <h4 class="font-semibold text-sm">Error</h4>
-                    <p class="text-sm">{{ session('error') }}</p>
+            @if (session('error'))
+                <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
+                    x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 flex items-center gap-3">
+                    <x-dynamic-component component="lucide-alert-circle" class="h-5 w-5 shrink-0 text-red-600" />
+                    <div>
+                        <h4 class="font-semibold text-sm">Error</h4>
+                        <p class="text-sm">{{ session('error') }}</p>
+                    </div>
                 </div>
-            </div>
-        @endif
+            @endif
 
             {{-- TOOLBAR SECTION --}}
             <div class="p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -117,8 +111,9 @@
                                         {{-- Tombol Delete --}}
                                         {{-- Pastikan route destroy sudah ada --}}
                                         {{-- action="{{ route('admin.categories.destroy', $item->id) }}" --}}
-                                        <form action="{{ asset("/admin/medicine-category/$item->category_id") }}" method="POST"
-                                              onsubmit="return confirm('Are you sure you want to delete this category?');">
+                                        <form action="{{ asset("/admin/medicine-category/$item->category_id") }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Are you sure you want to delete this category?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
@@ -181,7 +176,8 @@
                         <div class="space-y-4">
                             <div class="space-y-1.5">
                                 <label class="text-sm font-medium text-foreground">Category Name</label>
-                                <input type="text" name="name" placeholder="e.g., Antibiotics" value="{{ old('name') }}"
+                                <input type="text" name="name" placeholder="e.g., Antibiotics"
+                                    value="{{ old('name') }}"
                                     class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none @error('name') @enderror">
                                 {{-- Error Message --}}
                                 @error('name')
