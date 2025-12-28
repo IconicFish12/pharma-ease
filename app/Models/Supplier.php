@@ -14,6 +14,11 @@ class Supplier extends Model
     /** @use HasFactory<\Database\Factories\SupplierFactory> */
     use HasUuids;
     use HasFactory;
+    use \App\Traits\Auditable;
+
+    public function getCustomModuleName() {
+        return 'Supplier Management';
+    }
 
     protected $table = 'suppliers';
 

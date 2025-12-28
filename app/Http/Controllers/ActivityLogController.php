@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreActivityLogRequest;
 use App\Http\Requests\UpdateActivityLogRequest;
+use Spatie\Activitylog\Models\Activity;
 
 class ActivityLogController extends Controller
 {
@@ -12,7 +13,8 @@ class ActivityLogController extends Controller
      */
     public function index()
     {
-        return view('admin.audit_log.activity_management');
+        $logs = Activity::with('causer')->latest()->get();
+        return view('admin.audit_log.activity_management', compact('logs'));
     }
 
     /**

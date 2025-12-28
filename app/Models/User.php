@@ -17,6 +17,11 @@ class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasUuids, HasApiTokens;
+    use \App\Traits\Auditable;
+
+    public function getCustomModuleName() {
+        return 'User Management';
+    }
 
     protected $primaryKey = 'user_id';
 

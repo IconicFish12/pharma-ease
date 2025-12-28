@@ -38,7 +38,24 @@ class AuthController extends Controller
         try {
             if (!$validation->fails()) {
                 if (Auth::attempt($request->only(['email', 'password']), $request->remember_me)) {
+                    
                     $user = User::where('email', $request->email)->first();
+                    try {
+                        activity()
+                        ->useLog('Authentication')
+                        ->causedBy(Auth::user())
+                        ->withProperties([
+                            'ip' => request()->ip(),
+                            'user_name' => Auth::user()->name, // Ambil nama user yg baru login
+                            'role' => Auth::user()->role,      // Ambil role user
+                            'details' => 'Successful login'
+                        ])
+                        ->log('Login'); // Badge Hijau
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Gagal simpan log login: ' . $e->getMessage());
+                    }
+                    
+
 
                     if ($request->wantsJson()) {
                         $user->tokens()->delete();

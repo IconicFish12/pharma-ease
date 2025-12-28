@@ -111,7 +111,7 @@
 
                                         {{-- Tombol Delete --}}
                                         {{-- PERBAIKAN: Gunakan $item->supplier_id (bukan $item->id) --}}
-                                        <form action="{{ asset("/admin/suppliers-data/$item->supplier_id") }}"
+                                        <form action="{{ asset("/admin/suppliers/$item->supplier_id") }}"
                                             method="POST"
                                             onsubmit="return confirm('Are you sure you want to delete this supplier?');">
                                             @csrf
