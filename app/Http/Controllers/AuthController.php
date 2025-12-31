@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ResetPassword;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -21,7 +27,11 @@ class AuthController extends Controller
     }
 
     public function forgotPasswordView() {
-        return view('admin.auth.forgot_password', [ 'title' => 'Reset Password' ]);
+        return view('admin.auth.forgot_password', [
+            'title' => 'Reset Password',
+            'token' => request()->token,
+            'email' => request()->email
+        ]);
 
     }
 
@@ -46,11 +56,11 @@ class AuthController extends Controller
                         ->causedBy(Auth::user())
                         ->withProperties([
                             'ip' => request()->ip(),
-                            'user_name' => Auth::user()->name, // Ambil nama user yg baru login
-                            'role' => Auth::user()->role,      // Ambil role user
+                            'user_name' => Auth::user()->name,
+                            'role' => Auth::user()->role,
                             'details' => 'Successful login'
                         ])
-                        ->log('Login'); // Badge Hijau
+                        ->log('Login');
                     } catch (\Exception $e) {
                         \Illuminate\Support\Facades\Log::error('Gagal simpan log login: ' . $e->getMessage());
                     }
@@ -90,7 +100,6 @@ class AuthController extends Controller
                          ->withErrors($validation->errors());
 
         } catch (\Exception $e) {
-            // 6. Handle Error Server
             Log::error("Login Error: " . $e->getMessage());
 
             if ($request->wantsJson()) {
@@ -106,20 +115,66 @@ class AuthController extends Controller
     }
 
     public function sendMailProcess(Request $request) {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ], [
+            'email.required' => 'Input Email tidak boleh kosong',
+            'email.email' => 'Email Harus berupa Email yang valid',
+            'email.exists' => 'Email Tidak tersedia di data user',
+        ]);
+
         try {
-            $validation = Validator::Make();
+            $token = Str::random(64);
+
+            DB::table('password_reset_tokens')->updateOrInsert(
+                ['email' => $request->email],
+                [
+                    'email' => $request->email,
+                    'token' => $token,
+                    'created_at' => Carbon::now()
+                ]
+            );
+
+            Mail::to($request->email)->send(new ResetPassword($token, $request->email));
+
+            return back()->with('success', 'Kami telah mengirimkan link reset password ke email Anda!');
+
         } catch (\Exception $e) {
-            //throw $th;
+            Log::error("Mail Error: " . $e->getMessage());
+            return back()->with('error', 'Gagal mengirim email. Silakan coba lagi.');
         }
     }
 
     public function forgotPasswordProcess(Request $request) {
-        try {
-            $validation = Validator::Make();
-        } catch (\Exception $e) {
-            //throw $th;
-        }
+        $request->validate([
+            'password' => 'required|min:6|',
+            'token' => 'required'
+        ], [
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'password.min' => 'Password minimal 6 karakter.'
+        ]);
 
+        try {
+            $resetRecord = DB::table('password_reset_tokens')
+                ->where('token', $request->token)
+                ->first();
+            // dd($resetRecord);
+            if (!$resetRecord) {
+                return back()->with('error', 'Token tidak valid atau sudah kadaluarsa.');
+            }
+
+            User::where('email', $resetRecord->email)->update([
+                'password' => Hash::make($request->password)
+            ]);
+
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+            return redirect()->intended('/login')->with('success-reset', 'Password berhasil diubah! Silakan login.');
+
+        } catch (\Exception $e) {
+            Log::error("Reset Password Error: " . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan sistem.');
+        }
     }
 
     public function logout(Request $request): RedirectResponse

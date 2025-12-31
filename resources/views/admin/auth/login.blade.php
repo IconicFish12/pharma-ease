@@ -29,6 +29,19 @@
             </div>
         @endif
 
+        @if (session('success-reset'))
+            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
+                x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3">
+                <x-dynamic-component component="lucide-check-circle" class="h-5 w-5 shrink-0 text-emerald-600" />
+                <div>
+                    <h4 class="font-semibold text-sm">Success</h4>
+                    <p class="text-sm">{{ session('success-reset') }}</p>
+                </div>
+            </div>
+        @endif
+
         @if (session('error'))
             <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show"
                 x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
@@ -92,7 +105,7 @@
                 </div>
 
                 <div class="text-sm">
-                    <a href="#" class="font-medium text-primary hover:text-emerald-700 transition-colors">
+                    <a href="{{ route('password.sendMail') }}" class="font-medium text-primary hover:text-emerald-700 transition-colors">
                         Forgot Password?
                     </a>
                 </div>
