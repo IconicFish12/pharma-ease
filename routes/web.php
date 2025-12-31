@@ -19,6 +19,14 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'loginView'])->name('login');
     Route::post('/login', [AuthController::class, 'loginProcess'])->name('login.signIn');
+
+    Route::prefix('/password')->name('password.')->group(function () {
+        Route::get('/send-mail', [AuthController::class, 'sendMailView'])->name('sendMail');
+        Route::post('/send', [AuthController::class, 'sendMailProcess'])->name('send');
+
+        Route::get('/reset-password/{token}', [AuthController::class, 'forgotPasswordView'])->name('resetPassword');
+        Route::post('/reset', [AuthController::class, 'forgotPasswordProcess'])->name('reset');
+    });
 });
 
 Route::get('/audit-logs/export', [ActivityLogController::class, 'export'])->name('audit-logs.export');

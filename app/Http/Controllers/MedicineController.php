@@ -114,8 +114,6 @@ class MedicineController extends Controller
     public function update(UpdateMedicineRequest $request, Medicine $medicine)
     {
         try {
-            // dd($medicine->medicine_id);
-            // $medicine = Medicine::findOrFail($medicine->medicine_id);
             $data = $medicine->update($request->validated());
 
 
