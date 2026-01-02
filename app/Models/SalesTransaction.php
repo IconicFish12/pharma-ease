@@ -17,7 +17,7 @@ class SalesTransaction extends Model
     use HasFactory;
     use \App\Traits\Auditable;
     public function getCustomModuleName() {
-        return 'Transaction Details Management';
+        return 'Medicine Sales Transaction Management';
     }
 
     protected $table = 'sales_transactions';

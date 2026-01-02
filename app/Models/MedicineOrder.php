@@ -14,7 +14,7 @@ class MedicineOrder extends Model
     use \App\Traits\Auditable;
 
     public function getCustomModuleName() {
-        return 'Transaction Details Management';
+        return 'Medicine Order Management';
     }
     protected $table = 'medicine_orders';
 

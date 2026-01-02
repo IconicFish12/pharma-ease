@@ -10,12 +10,14 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class OrderDetails extends Pivot
 {
     /** @use HasFactory<\Database\Factories\OrderDetailsFactory> */
-    // use HasUuids;
     use HasFactory;
+    use \App\Traits\Auditable;
+
+    public function getCustomModuleName() {
+        return 'Medicine Order Details Management';
+    }
 
     protected $table = 'order_details';
-
-    // protected $primaryKey = ['order_id', 'medicine_id'];
 
     protected $guarded = [];
 
