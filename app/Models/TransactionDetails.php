@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class TransactionDetails extends Pivot
 {
     /** @use HasFactory<\Database\Factories\TransactionDetailsFactory> */
-    use HasUuids;
     use HasFactory;
     use \App\Traits\Auditable;
 
@@ -19,8 +18,6 @@ class TransactionDetails extends Pivot
     }
 
     protected $table = 'transaction_details';
-
-    protected $primaryKey = ['sales_id', 'medicine_id'];
 
     protected $guarded = [];
 

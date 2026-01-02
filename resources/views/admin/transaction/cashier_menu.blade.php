@@ -11,10 +11,10 @@
                 isLoading: false,
 
                 init() {
-                    console.log('Alpine Init Berjalan...'); 
+                    console.log('Alpine Init Berjalan...');
 
                     let rawData = @json($medicines);
-                    
+
                     console.log("Raw Data:", rawData);
 
                     if (!rawData || rawData.length === 0) {
@@ -28,7 +28,7 @@
                         medicine_name: item.medicine_name,
                         sku: item.sku,
                         stock: parseInt(item.stock),
-                        price: parseFloat(item.price), 
+                        price: parseFloat(item.price),
                         category: item.category
                     }));
                 },
@@ -38,7 +38,7 @@
                     const keyword = this.search.toLowerCase();
                     return this.medicines.filter(item => {
                         return item.medicine_name.toLowerCase().includes(keyword) ||
-                               item.sku.toLowerCase().includes(keyword);
+                            item.sku.toLowerCase().includes(keyword);
                     });
                 },
 
@@ -47,13 +47,16 @@
                 },
 
                 addToCart(item) {
-                    if (item.stock <= 0) { alert('Stok Habis!'); return; }
+                    if (item.stock <= 0) {
+                        alert('Stok Habis!');
+                        return;
+                    }
 
                     let existingItem = this.cart.find(c => c.medicine_id === item.medicine_id);
-                    
+
                     // Cek sisa stok real-time (Stok Awal - Jumlah di Cart)
                     let currentQtyInCart = existingItem ? existingItem.quantity : 0;
-                    
+
                     if (currentQtyInCart + 1 > item.stock) {
                         alert('Stok tidak mencukupi!');
                         return;
@@ -101,41 +104,44 @@
                     const userId = '{{ Auth::id() }}';
 
                     const payload = {
-                        items: this.cart.map(i => ({ medicine_id: i.medicine_id, quantity: i.quantity })),
+                        items: this.cart.map(i => ({
+                            medicine_id: i.medicine_id,
+                            quantity: i.quantity
+                        })),
                         cash_received: this.cashReceived,
                         user_id: userId
                     };
 
-                    fetch('{{ route("admin.transaction.store") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        this.isLoading = false;
-                        if (data.status === 'success') {
-                            alert('Transaksi Berhasil!\nKembalian: ' + this.formatRupiah(data.change));
-                            this.cart = [];
-                            this.cashReceived = '';
-                            
-                            payload.items.forEach(sold => {
-                                let med = this.medicines.find(m => m.medicine_id === sold.medicine_id);
-                                if(med) med.stock -= sold.quantity;
-                            });
-                        } else {
-                            alert('Gagal: ' + data.message);
-                        }
-                    })
-                    .catch(err => {
-                        this.isLoading = false;
-                        console.error(err);
-                        alert('Terjadi kesalahan sistem');
-                    });
+                    fetch('{{ route('admin.cashier-menu.transaction.store') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            this.isLoading = false;
+                            if (data.status === 'success') {
+                                alert('Transaksi Berhasil!\nKembalian: ' + this.formatRupiah(data.change));
+                                this.cart = [];
+                                this.cashReceived = '';
+
+                                payload.items.forEach(sold => {
+                                    let med = this.medicines.find(m => m.medicine_id === sold.medicine_id);
+                                    if (med) med.stock -= sold.quantity;
+                                });
+                            } else {
+                                alert('Gagal: ' + data.message);
+                            }
+                        })
+                        .catch(err => {
+                            this.isLoading = false;
+                            console.error(err);
+                            alert('Terjadi kesalahan sistem');
+                        });
                 }
             }
         }
@@ -158,7 +164,7 @@
                     <template x-for="item in filteredMedicines" :key="item.medicine_id">
                         <div @click="addToCart(item)"
                             class="group bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md cursor-pointer transition-all flex flex-col justify-between relative overflow-hidden">
-                            
+
                             <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-xs font-bold"
                                 :class="item.stock <= 10 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'">
                                 Stok: <span x-text="item.stock"></span>
@@ -167,20 +173,22 @@
                             <div>
                                 <h4 class="font-semibold text-foreground mb-1" x-text="item.medicine_name"></h4>
                                 <p class="text-xs text-muted-foreground mb-2" x-text="item.sku"></p>
-                                <p class="text-xs text-blue-600 bg-blue-50 inline-block px-2 py-1 rounded" 
-                                   x-text="item.category ? item.category.name : '-'"></p>
+                                <p class="text-xs text-blue-600 bg-blue-50 inline-block px-2 py-1 rounded"
+                                    x-text="item.category ? item.category.name : '-'"></p>
                             </div>
 
                             <div class="mt-4 pt-3 border-t border-border flex items-center justify-between">
                                 <span class="font-bold text-lg text-foreground" x-text="formatRupiah(item.price)"></span>
-                                <button class="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                                <button
+                                    class="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                                     <x-dynamic-component component="lucide-plus" class="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
                     </template>
-                    
-                    <div x-show="filteredMedicines.length === 0" class="col-span-full flex flex-col items-center justify-center py-12 text-muted-foreground">
+
+                    <div x-show="filteredMedicines.length === 0"
+                        class="col-span-full flex flex-col items-center justify-center py-12 text-muted-foreground">
                         <x-dynamic-component component="lucide-package-open" class="h-10 w-10 mb-2 opacity-50" />
                         <p>Obat tidak ditemukan.</p>
                     </div>
@@ -209,22 +217,26 @@
 
                         <div class="flex items-center justify-between mt-1">
                             <div class="flex items-center gap-3 bg-muted/50 rounded-md p-1">
-                                <button @click="updateQty(index, -1)" class="w-6 h-6 rounded bg-white shadow-sm flex items-center justify-center hover:text-red-600">
+                                <button @click="updateQty(index, -1)"
+                                    class="w-6 h-6 rounded bg-white shadow-sm flex items-center justify-center hover:text-red-600">
                                     <x-dynamic-component component="lucide-minus" class="h-3 w-3" />
                                 </button>
                                 <span class="text-sm font-medium w-6 text-center" x-text="cartItem.quantity"></span>
-                                <button @click="updateQty(index, 1)" class="w-6 h-6 rounded bg-white shadow-sm flex items-center justify-center hover:text-emerald-600">
+                                <button @click="updateQty(index, 1)"
+                                    class="w-6 h-6 rounded bg-white shadow-sm flex items-center justify-center hover:text-emerald-600">
                                     <x-dynamic-component component="lucide-plus" class="h-3 w-3" />
                                 </button>
                             </div>
-                            <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700 text-xs flex items-center gap-1">
+                            <button @click="removeFromCart(index)"
+                                class="text-red-500 hover:text-red-700 text-xs flex items-center gap-1">
                                 <x-dynamic-component component="lucide-trash-2" class="h-3 w-3" />
                             </button>
                         </div>
                     </div>
                 </template>
 
-                <div x-show="cart.length === 0" class="h-full flex flex-col items-center justify-center text-muted-foreground opacity-60">
+                <div x-show="cart.length === 0"
+                    class="h-full flex flex-col items-center justify-center text-muted-foreground opacity-60">
                     <p class="text-sm">Keranjang kosong</p>
                 </div>
             </div>
@@ -244,14 +256,13 @@
                     </div>
                 </div>
 
-                <div x-show="grandTotal > 0 && cashReceived >= grandTotal" 
-                     class="flex justify-between items-center text-sm px-3 py-2 bg-emerald-100 rounded-md border border-emerald-200 text-emerald-800">
+                <div x-show="grandTotal > 0 && cashReceived >= grandTotal"
+                    class="flex justify-between items-center text-sm px-3 py-2 bg-emerald-100 rounded-md border border-emerald-200 text-emerald-800">
                     <span class="font-bold">Kembalian:</span>
                     <span class="font-bold text-lg" x-text="formatRupiah(cashReceived - grandTotal)"></span>
                 </div>
 
-                <button @click="submitTransaction()"
-                    :disabled="cart.length === 0 || cashReceived < grandTotal || isLoading"
+                <button @click="submitTransaction()" :disabled="cart.length === 0 || cashReceived < grandTotal || isLoading"
                     class="w-full h-11 flex items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
                     <span x-show="!isLoading">Bayar & Cetak Struk</span>
                     <span x-show="isLoading" class="animate-spin">Proses...</span>

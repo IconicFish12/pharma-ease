@@ -31,49 +31,55 @@ class SalesTransactionController extends Controller
                 'kode_penjualan' => 'TRX-' . strtoupper(Str::random(8)),
                 'user_id' => Auth::id() ?? $request->user_id,
                 'transaction_date' => now(),
-                'total_amount' => 0,
+                'total_price' => 0,
             ]);
 
-            $totalAmount = 0;
+             $grandTotal = 0;
 
             foreach ($request->items as $item) {
                 $medicine = Medicine::findOrFail($item['medicine_id']);
 
-                if ($medicine->stock <= $item['quantity']) {
-                    LowStockMedicine::dispatch($medicine);
-
-                    return back()->with('error', "Stok {$medicine->medicine_name} habis!");
+                if ($medicine->stock < $item['quantity']) {
+                    throw new \Exception("Stok {$medicine->medicine_name} tidak cukup.");
                 }
 
                 $medicine->decrement('stock', $item['quantity']);
 
                 $subtotal = $medicine->price * $item['quantity'];
-
-                $totalAmount += $subtotal;
+                $grandTotal += $subtotal;
 
                 $transaction->medicines()->attach($medicine->medicine_id, [
                     'quantity' => $item['quantity'],
                     'unit_price' => $medicine->price,
                     'subtotal' => $subtotal
                 ]);
+
+                if ($medicine->stock <= 10) {
+                    LowStockMedicine::dispatch($medicine);
+                }
             }
 
             $cashReceived = $request->cash_received;
-
-            if ($cashReceived < $totalAmount) {
-                throw new \Exception("Uang kurang!");
+            if ($cashReceived < $grandTotal) {
+                throw new \Exception("Uang pembayaran kurang! Total: " . number_format($grandTotal));
             }
-            $change = $cashReceived - $totalAmount;
 
-            $transaction->update(['total_amount' => $totalAmount]);
+            $change = $cashReceived - $grandTotal;
+
+            $transaction->update(['total_price' => $grandTotal]);
 
             DB::commit();
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Transaction successful',
-                'change' => $change
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Transaction successful',
+                    'change' => $change,
+                    'transaction_code' => $transaction->kode_penjualan
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Transaction successful! Change: ' . number_format($change));
 
         } catch (\Exception $e) {
             DB::rollBack();

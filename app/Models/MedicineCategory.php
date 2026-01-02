@@ -17,7 +17,7 @@ class MedicineCategory extends Model
     use \App\Traits\Auditable;
 
     public function getCustomModuleName() {
-        return 'Inventory';
+        return 'Medicine Category Inventory';
     }
 
     protected $table = 'medicine_categories';

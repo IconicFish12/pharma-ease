@@ -18,7 +18,6 @@ return new class extends Migration
             $table->foreignUuid('user_id')->constrained('users', 'user_id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->date('transaction_date');
             $table->double('total_price');
-            $table->double('total_amount');
             $table->timestamps();
         });
     }
