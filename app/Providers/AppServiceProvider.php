@@ -63,14 +63,6 @@ class AppServiceProvider extends ServiceProvider
                 'icon' => 'shopping-cart',
                 'route' => 'admin.medicine-order'
             ],
-            // Transactions summary mungkin belum ada controllernya di web.php kamu?
-            // Saya asumsikan ini pakai sales index juga atau controller lain
-            // [
-            //     'id' => 'transactions',
-            //     'label' => 'Transaction Summary',
-            //     'icon' => 'receipt',
-            //     'route' => 'admin.sales'
-            // ],
             [
                 'id' => 'activity',
                 'label' => 'Activity Log',
@@ -81,7 +73,26 @@ class AppServiceProvider extends ServiceProvider
                 'id' => 'reports',
                 'label' => 'Reports',
                 'icon' => 'file-text',
-                'route' => 'admin.pharmacy-report'
+                'routes' => [
+                    [
+                        'id' => 'medicine-report',
+                        'label' => 'Medicine Report',
+                        'icon' => 'square-activity',
+                        'route' => 'admin.reports.medicine-report',
+                    ],
+                    [
+                        'id' => 'operational-report',
+                        'label' => 'Operational Report',
+                        'icon' => 'file-clock',
+                        'route' => 'admin.reports.operational-report',
+                    ],
+                    [
+                        'id' => 'financial-report',
+                        'label' => 'Financial Report',
+                        'icon' => 'receipt',
+                        'route' => 'admin.reports.financial-report',
+                    ],
+                ]
             ],
         ];
 

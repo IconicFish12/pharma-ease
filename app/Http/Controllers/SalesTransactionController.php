@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\LowStockMedicine;
 use App\Models\SalesTransaction;
 use App\Models\Medicine;
 use App\Http\Requests\StoreSalesTransactionRequest;
@@ -27,7 +28,7 @@ class SalesTransactionController extends Controller
             DB::beginTransaction();
 
             $transaction = SalesTransaction::create([
-                'kode_penjualan' => 'TRX-' . strtoupper(Str::random(8)), 
+                'kode_penjualan' => 'TRX-' . strtoupper(Str::random(8)),
                 'user_id' => Auth::id() ?? $request->user_id,
                 'transaction_date' => now(),
                 'total_amount' => 0,
@@ -38,12 +39,16 @@ class SalesTransactionController extends Controller
             foreach ($request->items as $item) {
                 $medicine = Medicine::findOrFail($item['medicine_id']);
 
-                if ($medicine->stock < $item['quantity']) {
-                    throw new \Exception("Stok {$medicine->medicine_name} habis!");
+                if ($medicine->stock <= $item['quantity']) {
+                    LowStockMedicine::dispatch($medicine);
+
+                    return back()->with('error', "Stok {$medicine->medicine_name} habis!");
                 }
 
                 $medicine->decrement('stock', $item['quantity']);
+
                 $subtotal = $medicine->price * $item['quantity'];
+
                 $totalAmount += $subtotal;
 
                 $transaction->medicines()->attach($medicine->medicine_id, [
@@ -53,8 +58,8 @@ class SalesTransactionController extends Controller
                 ]);
             }
 
-            // Hitung Kembalian di Backend
             $cashReceived = $request->cash_received;
+
             if ($cashReceived < $totalAmount) {
                 throw new \Exception("Uang kurang!");
             }
@@ -66,12 +71,16 @@ class SalesTransactionController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'change' => $change 
+                'message' => 'Transaction successful',
+                'change' => $change
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            if (request()->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            }
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 }

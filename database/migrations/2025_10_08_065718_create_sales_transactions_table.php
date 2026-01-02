@@ -16,8 +16,9 @@ return new class extends Migration
             $table->uuid('sales_id')->primary(true);
             $table->string('kode_penjualan')->unique();
             $table->foreignUuid('user_id')->constrained('users', 'user_id')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->date('trancation_date');
+            $table->date('transaction_date');
             $table->double('total_price');
+            $table->double('total_amount');
             $table->timestamps();
         });
     }
