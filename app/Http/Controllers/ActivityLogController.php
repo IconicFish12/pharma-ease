@@ -48,12 +48,10 @@ class ActivityLogController extends Controller
 
     public function export(Request $request)
     {
-        // Validasi format yang diminta (xlsx, csv, atau pdf)
         $format = $request->input('format', 'xlsx');
 
         $fileName = 'audit_log_' . date('Y-m-d_H-i') . '.' . $format;
 
-        // Tentukan Library Writer berdasarkan format
         $writerType = match ($format) {
             'pdf' => \Maatwebsite\Excel\Excel::DOMPDF,
             'csv' => \Maatwebsite\Excel\Excel::CSV,

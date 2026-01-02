@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignUuid('supplier_id')->constrained('suppliers', 'supplier_id')->cascadeOnDelete()->cascadeOnUpdate();
             $table->unsignedInteger('stock');
             $table->decimal('price', 15, 2);
-            $table->date('expired_date');
+            $table->dateTime('expired_date');
             $table->timestamps();
         });
     }

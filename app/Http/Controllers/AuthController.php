@@ -177,13 +177,28 @@ class AuthController extends Controller
         }
     }
 
-    public function logout(Request $request): RedirectResponse
+    public function logout(Request $request)
     {
         Auth::logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
+
+        if($request->wantsJson()){
+            $user = User::where('email', $request->email)->first();
+
+            $user->tokens->delete();
+
+            Auth::logout();
+
+            $request->session()->invalidate();
+
+            $request->session()->regenerateToken();
+
+
+            return response()->json();
+        }
 
         return redirect()->to('/login')->with('logout-success', 'Successfully Logout');
     }

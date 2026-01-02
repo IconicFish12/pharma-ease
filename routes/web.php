@@ -81,18 +81,24 @@ Route::prefix('/admin')->middleware('auth')->name('admin.')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
         Route::post('/show', [UserController::class, 'show']);
-
         Route::put('/{user}', [UserController::class, 'update']);
         Route::delete('/{user}', [UserController::class, 'destroy']);
     });
 
-    Route::prefix('/reports')->name('pharmacy-report')->group(function(){
-        Route::get('/', [ReportController::class, 'index']);
+    Route::prefix('/reports')->name('reports.')->group(function(){
+        Route::get('/medicine-report', [ReportController::class, 'medicineReport'])->name('medicine-report');
+        Route::get('/medicine-report-export', [ReportController::class, 'medicineReportExport'])->name('medicine-report-export');
+
+        Route::get('/operational-report', [ReportController::class, 'operationalReport'])->name('operational-report');
+        Route::get('/operational-report-export', [ReportController::class, 'operationalReportExport'])->name('operational-report-export');
+
+        Route::get('/financial-report', [ReportController::class, 'financialReport'])->name('financial-report');
+        Route::get('/financial-report-export', [ReportController::class, 'financialReportExport'])->name('financial-report-export');
     });
 
-    Route::prefix('/cashier-menu')->group(function(){
-        Route::get('/', [SalesTransactionController::class, 'index'])->name('cashier-menu');
-        Route::post('/', [SalesTransactionController::class, 'store'])->name('transaction.store');
+    Route::prefix('/cashier-menu')->name('cashier-menu')->group(function(){
+        Route::get('/', [SalesTransactionController::class, 'index']);
+        Route::post('/', [SalesTransactionController::class, 'store'])->name('.transaction.store');
     });
 
 });
