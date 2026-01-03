@@ -25,7 +25,7 @@ class MedicineFactory extends Factory
             'description' => $this->faker->paragraphs(2, true),
             'category_id' =>  MedicineCategory::inRandomOrder()->first()->category_id ?? MedicineCategory::factory(),
             'supplier_id' => Supplier::inRandomOrder()->first()->supplier_id ?? Supplier::factory(),
-            'stock' => $this->faker->randomNumber(3, false),
+            'stock' => $this->faker->randomNumber(2, true),
             'price' => $this->faker->randomNumber(5, true),
             'expired_date' => $this->faker->dateTimeBetween('+4 days', '+1 week'),
         ];

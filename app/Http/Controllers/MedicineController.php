@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\ExpiredMedicine;
+use App\Events\LowStockMedicine;
 use App\Models\Medicine;
 use App\Http\Requests\StoreMedicineRequest;
 use App\Http\Requests\UpdateMedicineRequest;
@@ -24,6 +25,12 @@ class MedicineController extends Controller
 
         if ($expiredMedicines->count() > 0) {
            ExpiredMedicine::dispatch($expiredMedicines);
+        }
+
+        foreach ($data as $item) {
+            if ($item->stock <= 15) {
+                LowStockMedicine::dispatch($item);
+            }
         }
 
         if (request()->wantsJson()) {

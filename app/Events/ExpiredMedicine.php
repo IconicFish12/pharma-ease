@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ExpiredMedicine
+class ExpiredMedicine implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -26,6 +26,18 @@ class ExpiredMedicine
     }
 
     /**
+    * The event's broadcast name.
+    */
+
+    public function broadcastAs(): string
+
+    {
+
+        return 'expired.medicine';
+
+    }
+
+    /**
      * Get the channels the event should broadcast on.
      *
      * @return array<int, \Illuminate\Broadcasting\Channel>
@@ -33,7 +45,28 @@ class ExpiredMedicine
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            new Channel('inventory-channel'),
+        ];
+    }
+
+    /**
+     * Get the data to broadcast.
+     *
+     * @return array<string, mixed>
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'type' => 'expired',
+            'count' => $this->medicines->count(),
+            'items' => $this->medicines->map(function ($med) {
+                return [
+                    'medicine_id' => $med->medicine_id ?? $med->id,
+                    'medicine_name' => $med->medicine_name,
+                    'expired_date' => $med->expired_date,
+                ];
+            })->toArray(),
+            'timestamp' => now()->toDateTimeString(),
         ];
     }
 }
