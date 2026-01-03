@@ -45,6 +45,8 @@ class SalesTransactionController extends Controller
 
                 $medicine->decrement('stock', $item['quantity']);
 
+                $medicine->refresh();
+
                 $subtotal = $medicine->price * $item['quantity'];
                 $grandTotal += $subtotal;
 
@@ -54,7 +56,7 @@ class SalesTransactionController extends Controller
                     'subtotal' => $subtotal
                 ]);
 
-                if ($medicine->stock <= 10) {
+                if ($medicine->stock <= 15) {
                     LowStockMedicine::dispatch($medicine);
                 }
             }

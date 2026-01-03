@@ -49,7 +49,7 @@ class ReportController extends Controller
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
 
         $revenue = SalesTransaction::whereBetween('transaction_date', [$startDate, $endDate])
-            ->sum('total_amount');
+            ->sum('total_price');
 
         $expenses = MedicineOrder::whereBetween('order_date', [$startDate, $endDate])
             ->sum('total_price');

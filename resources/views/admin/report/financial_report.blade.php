@@ -26,7 +26,6 @@
                 <div class="flex gap-2">
                     <button type="submit"
                         class="h-9 px-4 rounded-md bg-primary text-white text-sm font-medium hover:bg-emerald-700">Filter</button>
-                    {{-- Tombol Export menggunakan parameter filter saat ini --}}
                     <a href="{{ route('admin.reports.financial-report-export', request()->query()) }}"
                         class="h-9 px-4 inline-flex items-center justify-center rounded-md border border-input bg-background hover:bg-muted text-foreground text-sm font-medium">
                         <x-dynamic-component component="lucide-download" class="h-4 w-4" />
@@ -81,9 +80,9 @@
                         @forelse($transactions as $trx)
                             <tr class="hover:bg-muted/10">
                                 <td class="px-6 py-4">{{ date('d M Y H:i', strtotime($trx->transaction_date)) }}</td>
-                                <td class="px-6 py-4 font-mono text-xs">{{ $trx->transaction_code }}</td>
+                                <td class="px-6 py-4 font-mono text-xs">{{ $trx->kode_penjualan }}</td>
                                 <td class="px-6 py-4">{{ $trx->user->name ?? 'Unknown' }}</td>
-                                <td class="px-6 py-4 text-right font-medium text-green-600">@money($trx->total_amount)</td>
+                                <td class="px-6 py-4 text-right font-medium text-green-600">@money($trx->total_price)</td>
                             </tr>
                         @empty
                             <tr>

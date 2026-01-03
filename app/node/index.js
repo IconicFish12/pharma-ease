@@ -1,24 +1,60 @@
 import dotenv from "dotenv";
-import { createClient } from "redis";
 import admin from "firebase-admin";
-import service from "./firebase/firebase-service-account.json" with { type: "json" };
+import service from "./firebase/pharma-ease-firebase-adminsdk-fbsvc-09a5298f61.json" with { type: "json" };
+import Echo from 'laravel-echo';
+import Pusher from "pusher-js";
+import axios from "axios";
+import { WebSocket } from 'ws';
+
+global.Pusher = Pusher;
+global.WebSocket = WebSocket;
 
 dotenv.config();
 
-admin.initializeApp({
-    credential: admin.credential.cert(service)
-});
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert(service)
+    });
+}
 
 let lowStockBuffer = [];
 let expiredBuffer = [];
 
+const echo = new Echo({
+    broadcaster: 'reverb',
+    key: process.env.VITE_REVERB_APP_KEY,
+    wsHost: process.env.VITE_REVERB_HOST,
+    wsPort: process.env.VITE_REVERB_PORT ?? 8080,
+    wssPort: process.env.VITE_REVERB_PORT ?? 8080,
+    forceTLS: (process.env.VITE_REVERB_SCHEME ?? 'http') === 'https',
+    enabledTransports: ['ws', 'wss'],
+    disableStats: true,
+    Pusher: Pusher
+});
+
+console.log(`[Gatekeeper] Menghubungkan ke Reverb di ${process.env.VITE_REVERB_HOST}:${process.env.VITE_REVERB_PORT}...`);
+
+echo.channel('inventory-channel')
+    .listen('.low.stock', (e) => {
+        console.log(`[Event Masuk] Low Stock: ${e.medicine_name}`);
+
+        const exists = lowStockBuffer.find(item => item.medicine_id === e.medicine_id);
+        if (!exists) {
+            lowStockBuffer.push(e);
+        }
+    })
+    .listen('.expired.meds', (e) => {
+        console.log(`[Event Masuk] Expired Batch: ${e.count} items`);
+
+        e.items.forEach(item => {
+             expiredBuffer.push(item);
+        });
+    });
+
 
 async function sendFCM(title, body, dataPayload = {}) {
     const message = {
-        notification: {
-            title: title,
-            body: body
-        },
+        notification: { title, body },
         data: {
             ...dataPayload,
             click_action: 'FLUTTER_NOTIFICATION_CLICK'
@@ -28,9 +64,9 @@ async function sendFCM(title, body, dataPayload = {}) {
 
     try {
         const response = await admin.messaging().send(message);
-        console.log(`[FCM] Sukses kirim notif: ${response}`);
+        console.log(`[FCM] Terkirim: ${title}`);
     } catch (error) {
-        console.error('[FCM] Gagal kirim:', error);
+        console.error('[FCM] Gagal:', error.message);
     }
 }
 
@@ -42,17 +78,12 @@ setInterval(() => {
         const firstItem = lowStockBuffer[0].medicine_name;
 
         let title = "Peringatan Stok Menipis!";
-        let body = "";
+        let body = count === 1
+            ? `Stok obat ${firstItem} kritis.`
+            : `${firstItem} dan ${count - 1} obat lainnya kritis.`;
 
-        if (count === 1) {
-            body = `Stok obat ${firstItem} tersisa sedikit. Segera restock.`;
-        } else {
-            body = `${firstItem} dan ${count - 1} obat lainnya mengalami stok kritis.`;
-        }
-
-        console.log(`[Gatekeeper] Mengirim ringkasan Low Stock (${count} item)...`);
         sendFCM(title, body, { type: 'low_stock_summary' });
-
+        console.log(`[Summary] Low Stock (${count}) processed.`);
         lowStockBuffer = [];
     }
 
@@ -60,46 +91,11 @@ setInterval(() => {
         const count = expiredBuffer.length;
 
         let title = "Peringatan Kadaluarsa!";
-        let body = `${count} obat telah melewati tanggal kadaluarsa. Harap periksa gudang.`;
+        let body = `${count} obat telah melewati tanggal kadaluarsa. Cek gudang segera.`;
 
-        console.log(`[Gatekeeper] Mengirim ringkasan Expired (${count} item)...`);
         sendFCM(title, body, { type: 'expired_summary' });
-
+        console.log(`[Summary] Expired (${count}) processed.`);
         expiredBuffer = [];
     }
 
 }, AGGREGATION_INTERVAL);
-
-
-async function startRedisListener() {
-    const client = createClient({
-        url: process.env.REDIS_URL
-    });
-
-    client.on('error', (err) => console.error('[Redis] Error:', err));
-
-    await client.connect();
-    console.log('[Redis] Terhubung. Menunggu data dari Laravel...');
-
-    await client.subscribe(process.env.REDIS_CHANNEL, (message) => {
-        try {
-            const data = JSON.parse(message);
-            console.log(`[Masuk] Data diterima: ${data.type} - ${data.medicine_name}`);
-
-            if (data.type === 'low_stock') {
-                const exists = lowStockBuffer.find(item => item.medicine_id === data.medicine_id);
-                if (!exists) {
-                    lowStockBuffer.push(data);
-                }
-            }
-            else if (data.type === 'expired') {
-                expiredBuffer.push(data);
-            }
-
-        } catch (e) {
-            console.error('[System] Error parsing JSON dari Laravel', e);
-        }
-    });
-}
-
-startRedisListener();
