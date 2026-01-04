@@ -19,7 +19,7 @@ Route::post('/login', [AuthController::class, 'loginProcess'])->middleware('gues
 
 Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-Route::prefix('/admin')->group(function () {
+Route::prefix('/admin')->middleware('auth:sanctum')->group(function () {
 
     Route::prefix('/medicine')->group(function(){
         Route::get('/', [MedicineController::class, 'index']);
