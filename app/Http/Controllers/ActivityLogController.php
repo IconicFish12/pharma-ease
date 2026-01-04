@@ -43,6 +43,15 @@ class ActivityLogController extends Controller
         }
 
         $logs = $query->paginate(10)->withQueryString();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Successfully Fetching Activiity Logs data',
+                'data' => $logs,
+            ]);
+
+        }
         return view('admin.audit_log.activity_management', compact('logs'));
     }
 

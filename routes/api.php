@@ -48,10 +48,6 @@ Route::prefix('/admin')->group(function () {
 
     Route::prefix('/activity-log')->group(function(){
         Route::get('/', [ActivityLogController::class, 'index']);
-        Route::post('/', [ActivityLogController::class, 'store']);
-        Route::post('/show', [ActivityLogController::class, 'show']);
-        Route::put('/{activityLog:id}', [ActivityLogController::class, 'update']);
-        Route::delete('/{activityLog:id}', [ActivityLogController::class, 'destroy']);
     });
 
     Route::prefix('/suppliers')->group(function(){
@@ -70,16 +66,9 @@ Route::prefix('/admin')->group(function () {
         Route::delete('/{user:user-id}', [UserController::class, 'destroy']);
     });
 
-    // Route::prefix('/reports')->group(function(){
-    //     Route::get('/', [ReportController::class, 'index']);
-    // });
-
-    // Route::prefix('/cashier-menu')->group(function(){
-    //     Route::get('/', [SalesTransactionController::class, 'index']);
-    //     Route::post('/', [SalesTransactionController::class, 'store']);
-    //     Route::post('/show', [SalesTransactionController::class, 'show']);
-    //     Route::put('/{medicine:id}', [SalesTransactionController::class, 'update']);
-    //     Route::delete('/{medicine:id}', [SalesTransactionController::class, 'destroy']);
-    // });
+    Route::prefix('/cashier-menu')->group(function(){
+        Route::get('/', [SalesTransactionController::class, 'index']);
+        Route::post('/', [SalesTransactionController::class, 'store']);
+    });
 
 });
