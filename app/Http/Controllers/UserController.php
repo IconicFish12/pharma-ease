@@ -116,6 +116,8 @@ class UserController extends Controller
         }
     }
 
+    //sfhsiu
+
     public function destroy(User $user)
     {
         try {
