@@ -14,29 +14,30 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $query = User::query();
-
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('user_id', 'like', "%{$search}%"); 
+                  ->orWhere('user_id', 'like', "%{$search}%");
             });
         }
 
-        $limit = $request->input('paginate', 15); 
-        
+        $limit = $request->input('paginate', 15);
         $data = $query->paginate($limit);
 
-        if (method_exists($data, 'toResourceCollection')) {
-            $data = $data->toResourceCollection();
-        }
-
+        // ubah datanya menjadi Resource Collection HANYA jika request meminta JSON (API)
         if ($request->wantsJson()) {
             return response()->json([
                 'status' => 'success',
                 'message' => 'User Data fetched Successfully',
-                'data' => $data,
+                'data' => UserResource::collection($data),
+                'pagination' => [
+                    'total' => $data->total(),
+                    'per_page' => $data->perPage(),
+                    'current_page' => $data->currentPage(),
+                    'last_page' => $data->lastPage(),
+                ]
             ]);
         }
 
@@ -52,6 +53,7 @@ class UserController extends Controller
 
     public function create()
     {
+
     }
 
     public function store(StoreUserRequest $request)
@@ -80,10 +82,12 @@ class UserController extends Controller
 
     public function show(User $user)
     {
+
     }
 
     public function edit(User $user)
     {
+
     }
 
     public function update(UpdateUserRequest $request, User $user)
@@ -105,12 +109,14 @@ class UserController extends Controller
             return redirect()->back()->with('success', 'User updated successfully');
 
         } catch (\Exception $e) {
-            if ($request->wantsJson()) {    
+            if ($request->wantsJson()) {
                 return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
             }
             return redirect()->back()->with('error', 'Failed: ' . $e->getMessage())->withInput();
         }
     }
+
+    //sfhsiu
 
     public function destroy(User $user)
     {
