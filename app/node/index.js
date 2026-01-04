@@ -3,8 +3,9 @@ import admin from "firebase-admin";
 import service from "./firebase/pharma-ease-firebase-adminsdk-fbsvc-09a5298f61.json" with { type: "json" };
 import Echo from 'laravel-echo';
 import Pusher from "pusher-js";
-import axios from "axios";
 import { WebSocket } from 'ws';
+import fs from 'fs';
+import path from 'path';
 
 global.Pusher = Pusher;
 global.WebSocket = WebSocket;
@@ -19,6 +20,15 @@ if (!admin.apps.length) {
 
 let lowStockBuffer = [];
 let expiredBuffer = [];
+
+function writeLog(status, title, responseOrError) {
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] [${status}] ${title} | Info: ${JSON.stringify(responseOrError)}\n`;
+
+    fs.appendFile(path.join(process.cwd(), 'fcm_history.log'), logMessage, (err) => {
+        if (err) console.error("Gagal menulis log lokal:", err);
+    });
+}
 
 const echo = new Echo({
     broadcaster: 'reverb',
@@ -65,8 +75,12 @@ async function sendFCM(title, body, dataPayload = {}) {
     try {
         const response = await admin.messaging().send(message);
         console.log(`[FCM] Terkirim: ${title}`);
+
+        writeLog('SUCCESS', title, response);
     } catch (error) {
         console.error('[FCM] Gagal:', error.message);
+
+        writeLog('FAILED', title, error.message);
     }
 }
 
