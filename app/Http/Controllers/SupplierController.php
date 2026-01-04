@@ -49,36 +49,35 @@ class SupplierController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreSupplierRequest $request)
-    {
-        try {
-            $data = Supplier::create($request->validated());
+   public function store(StoreSupplierRequest $request)
+{
+    try {
+        $data = Supplier::create($request->validated());
 
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Suppplier Data is added Successfully',
-                    'data' => $data
-                ]);
-            }
-
-            $request->session()->flash('success', 'Supplier successfully added!');
-
-            return redirect()->back();
-        } catch (\Exception $e) {
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Failed to add Suppplier Data',
-                    'errors' => $e->getMessage()
-                ]);
-            }
-
-            $request->session()->flash('error', 'Failed to add supplier: ' . $e->getMessage());
-
-            return redirect()->back()->withInput();
+        if ($request->wantsJson()) {
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Supplier data added successfully',
+                'data'    => $data
+            ], 201);
         }
+
+        return redirect()->back()->with('success', 'Supplier successfully added!');
+
+    } catch (\Exception $e) {
+        if ($request->wantsJson()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Failed to add supplier data',
+                'errors'  => $e->getMessage()
+            ], 500); 
+        }
+
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Failed to add supplier: ' . $e->getMessage());
     }
+}
 
     /**
      * Display the specified resource.
@@ -99,34 +98,22 @@ class SupplierController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateSupplierRequest $request, Supplier $supplier)
+public function update(UpdateSupplierRequest $request, Supplier $supplier)
     {
         try {
-            $data = $supplier->find($supplier->supplier_id)->update($request->validated());
+            $supplier->update($request->validated());
 
             if ($request->wantsJson()) {
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Suppplier Data is updated Successfully',
-                    'data' => $data
+                    'message' => 'Supplier updated successfully',
+                    'data' => new SupplierResource($supplier)
                 ]);
             }
 
-            $request->session()->flash('success', 'Supplier successfully updated!');
-
-            return redirect()->back();
+            return redirect()->back()->with('success', 'Supplier berhasil diperbarui!');
         } catch (\Exception $e) {
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Failed to update Suppplier Data',
-                    'errors' => $e->getMessage()
-                ]);
-            }
-
-            $request->session()->flash('error', 'Failed to update supplier: ' . $e->getMessage());
-
-            return redirect()->back()->withInput();
+            return $this->handleError($request, 'Gagal memperbarui supplier', $e->getMessage());
         }
     }
 
@@ -164,3 +151,4 @@ class SupplierController extends Controller
         }
     }
 }
+

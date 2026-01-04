@@ -49,7 +49,7 @@ class AppServiceProvider extends ServiceProvider
                 'id' => 'users',
                 'label' => 'User Management',
                 'icon' => 'users',
-                'route' => 'admin.users-data'
+                'route' => 'admin.users-data.index'
             ],
             [
                 'id' => 'suppliers',

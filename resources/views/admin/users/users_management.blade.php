@@ -55,7 +55,6 @@
                 <h3 class="font-semibold text-lg text-foreground">User Management</h3>
                 <div class="flex items-center gap-3">
                     {{-- SEARCH FORM --}}
-                    {{-- Action dikosongkan agar submit ke URL halaman saat ini --}}
                     <form action="" method="GET" class="relative w-full sm:w-64">
                         <x-dynamic-component component="lucide-search" class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <input type="text" name="search" placeholder="Search users..." value="{{ request('search') }}"
@@ -107,8 +106,8 @@
                                         <button @click="openEditModal({{ json_encode($item) }})" class="p-2 text-orange-600 hover:bg-blue-50 rounded-md transition-colors">
                                             <x-dynamic-component component="lucide-pencil" class="h-4 w-4" />
                                         </button>
-                                        {{-- Pastikan route destroy benar --}}
-                                        <form action="{{ route('admin.users-data', $item) }}" method="POST" onsubmit="return confirm('Delete this user?');">
+                                        
+                                        <form action="{{ route('admin.users-data.destroy', $item) }}" method="POST" onsubmit="return confirm('Delete this user?');">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors">
                                                 <x-dynamic-component component="lucide-trash-2" class="h-4 w-4" />
@@ -144,11 +143,17 @@
                 </div>
 
                 <div class="p-6 overflow-y-auto custom-scrollbar">
-                    {{-- Form handling for both Add and Edit --}}
-                    {{-- Menggunakan route users-data tanpa ID di action form, ID akan dihandle Laravel jika method PUT --}}
-                    <form :action="showEditModal ? '{{ route('admin.users-data') }}/' + editForm.id : '{{ route('admin.users-data') }}'" method="POST">
+                    {{-- FORM UTAMA --}}
+                    <form :action="showEditModal ? '{{ route('admin.users-data.index') }}/' + editForm.id : '{{ route('admin.users-data.store') }}'" method="POST">
                         @csrf
-                        <template x-if="showEditModal"><input type="hidden" name="_method" value="PUT"></template>
+                        
+                        {{-- FIX UTAMA: Menambahkan hidden ID agar terdeteksi saat redirect error --}}
+                        <template x-if="showEditModal">
+                            <div>
+                                <input type="hidden" name="_method" value="PUT">
+                                <input type="hidden" name="id" x-model="editForm.id">
+                            </div>
+                        </template>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="space-y-1">

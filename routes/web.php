@@ -73,13 +73,13 @@ Route::prefix('/admin')->middleware('auth')->name('admin.')->group(function () {
         Route::delete('/{supplier:supplier_id}', [SupplierController::class, 'destroy']);
     });
 
-    Route::prefix('/users')->name('users-data')->group(function(){
-        Route::get('/', [UserController::class, 'index']);
-        Route::post('/', [UserController::class, 'store']);
-        Route::post('/show', [UserController::class, 'show']);
+    Route::prefix('/users')->name('users-data.')->group(function(){
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::post('/show', [UserController::class, 'show'])->name('show');
         
-        Route::put('/{user:user_id}', [UserController::class, 'update']);
-        Route::delete('/{user:user_id}', [UserController::class, 'destroy']);
+        Route::put('/{user:user_id}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{user:user_id}', [UserController::class, 'destroy'])->name('destroy');
     }); 
 
     Route::prefix('/reports')->name('reports.')->group(function(){
