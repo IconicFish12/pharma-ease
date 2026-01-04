@@ -28,7 +28,7 @@ class MedicineController extends Controller
         }
 
         foreach ($data as $item) {
-            if ($item->stock <= 15) {
+            if ($item->stock < 15) {
                 LowStockMedicine::dispatch($item);
             }
         }

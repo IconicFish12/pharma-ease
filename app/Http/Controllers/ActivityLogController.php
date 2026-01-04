@@ -50,7 +50,6 @@ class ActivityLogController extends Controller
                 'message' => 'Successfully Fetching Activiity Logs data',
                 'data' => $logs,
             ]);
-
         }
         return view('admin.audit_log.activity_management', compact('logs'));
     }

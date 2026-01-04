@@ -35,7 +35,6 @@ class UpdateMedicineRequest extends FormRequest
             'medicine_name.required' => 'Nama obat wajib diisi.',
             'medicine_name.min' => 'Nama obat minimal harus 5 karakter.',
             'sku.required' => 'Kode SKU wajib diisi.',
-            'sku.unique' => 'Kode SKU ini sudah digunakan obat lain.',
             'description.min' => 'Deskripsi minimal 10 karakter.',
             'category_id.required' => 'Kategori obat wajib dipilih.',
             'supplier_id.required' => 'Supplier wajib dipilih.',
