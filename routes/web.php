@@ -77,9 +77,10 @@ Route::prefix('/admin')->middleware('auth')->name('admin.')->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
         Route::post('/show', [UserController::class, 'show']);
-        Route::put('/{user}', [UserController::class, 'update']);
-        Route::delete('/{user}', [UserController::class, 'destroy']);
-    });
+        
+        Route::put('/{user:user_id}', [UserController::class, 'update']);
+        Route::delete('/{user:user_id}', [UserController::class, 'destroy']);
+    }); 
 
     Route::prefix('/reports')->name('reports.')->group(function(){
         Route::get('/medicine-report', [ReportController::class, 'medicineReport'])->name('medicine-report');

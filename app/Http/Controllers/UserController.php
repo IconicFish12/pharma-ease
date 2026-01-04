@@ -11,33 +11,32 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $query = User::latest();
+        $query = User::query();
 
-        if (request('search')) {
-            $search = request('search');
+        if ($request->filled('search')) {
+            $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%')
-                  ->orWhere('emp_id', 'like', '%' . $search . '%')
-                  ->orWhere('role', 'like', '%' . $search . '%');
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('user_id', 'like', "%{$search}%"); 
             });
         }
 
-        $data = $query->paginate(request('paginate', 15))->withQueryString();
+        $limit = $request->input('paginate', 15); 
+        
+        $data = $query->paginate($limit);
 
-        if (request()->wantsJson()) {
+        if (method_exists($data, 'toResourceCollection')) {
+            $data = $data->toResourceCollection();
+        }
+
+        if ($request->wantsJson()) {
             return response()->json([
                 'status' => 'success',
-                'message' => 'User Data is fetch Successfully',
-                'data' => UserResource::collection($data),
-                'meta' => [
-                    'current_page' => $data->currentPage(),
-                    'last_page' => $data->lastPage(),
-                    'per_page' => $data->perPage(),
-                    'total' => $data->total(),
-                ]
+                'message' => 'User Data fetched Successfully',
+                'data' => $data,
             ]);
         }
 
@@ -87,7 +86,6 @@ class UserController extends Controller
     {
     }
 
-
     public function update(UpdateUserRequest $request, User $user)
     {
         try {
@@ -107,7 +105,7 @@ class UserController extends Controller
             return redirect()->back()->with('success', 'User updated successfully');
 
         } catch (\Exception $e) {
-            if ($request->wantsJson()) {
+            if ($request->wantsJson()) {    
                 return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
             }
             return redirect()->back()->with('error', 'Failed: ' . $e->getMessage())->withInput();
