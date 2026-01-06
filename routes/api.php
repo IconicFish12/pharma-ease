@@ -63,7 +63,7 @@ Route::prefix('/admin')->middleware('auth:sanctum')->group(function () {
         Route::post('/', [UserController::class, 'store']);
         Route::post('/show', [UserController::class, 'show']);
         Route::put('/{user:user_id}', [UserController::class, 'update']);
-        Route::delete('/{user:user-id}', [UserController::class, 'destroy']);
+        Route::delete('/{user:user_id}', [UserController::class, 'destroy']);
     });
 
     Route::prefix('/cashier-menu')->group(function(){
