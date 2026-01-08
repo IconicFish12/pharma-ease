@@ -17,17 +17,18 @@ class UpdateUserRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
-        $id = $this->input('id');
+        $id = $this->route('id'); 
 
         return [
             'name' => 'required|string|max:255',
+            
             'emp_id' => 'required|string|unique:users,emp_id,' . $id . ',user_id',
+            
             'email' => 'required|email|unique:users,email,' . $id . ',user_id',
+            
             'password' => 'nullable|string|min:6',
             'role' => ['required', Rule::in(['admin', 'owner', 'pharmacist', 'cashier'])],
             'shift' => ['nullable', Rule::in(['pagi', 'siang', 'malam'])],
