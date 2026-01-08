@@ -58,14 +58,13 @@ Route::prefix('/admin')->middleware('auth:sanctum')->group(function () {
         Route::delete('/{supplier:supplier_id}', [SupplierController::class, 'destroy']);
     });
 
-    Route::prefix('/users')->group(function(){
-        Route::get('/', [UserController::class, 'index']);
-        Route::post('/', [UserController::class, 'store']);
-        Route::post('/show', [UserController::class, 'show']);
-        Route::put('/{user:user_id}', [UserController::class, 'update']);
-        Route::delete('/{user:user_id}', [UserController::class, 'destroy']);
-    });
-
+Route::prefix('/users')->group(function(){
+    Route::get('/', [UserController::class, 'index']);
+    Route::post('/', [UserController::class, 'store']);
+    Route::post('/show', [UserController::class, 'show']);
+    Route::put('/{id}', [UserController::class, 'update']);
+    Route::delete('/{id}', [UserController::class, 'destroy']);
+});
     Route::prefix('/cashier-menu')->group(function(){
         Route::get('/', [SalesTransactionController::class, 'index']);
         Route::post('/', [SalesTransactionController::class, 'store']);

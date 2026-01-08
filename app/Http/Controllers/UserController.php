@@ -90,9 +90,18 @@ class UserController extends Controller
 
     }
 
-    public function update(UpdateUserRequest $request, User $user)
+public function update(UpdateUserRequest $request, $id)
     {
         try {
+            $user = User::where('user_id', $id)->first();
+
+            if (!$user) {
+                 if ($request->wantsJson()) {
+                    return response()->json(['status' => 'error', 'message' => 'User not found'], 404);
+                }
+                return redirect()->back()->with('error', 'User not found');
+            }
+
             $validated = $request->validated();
 
             if (empty($validated['password'])) {
@@ -115,12 +124,22 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Failed: ' . $e->getMessage())->withInput();
         }
     }
-
-    //sfhsiu
-
-    public function destroy(User $user)
+public function destroy($id)
     {
         try {
+            // 1. Cari manual berdasarkan kolom 'user_id'
+            // Pastikan nama kolom 'user_id' ini sesuai dengan nama kolom di database Anda
+            $user = User::where('user_id', $id)->first();
+
+            // 2. Cek apakah user ketemu
+            if (!$user) {
+                if (request()->wantsJson()) {
+                    return response()->json(['status' => 'error', 'message' => 'User not found'], 404);
+                }
+                return redirect()->back()->with('error', 'User not found');
+            }
+
+            // 3. Hapus
             $user->delete();
 
             if (request()->wantsJson()) {
